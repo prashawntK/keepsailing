@@ -29,7 +29,8 @@ export async function GET(req: NextRequest) {
       prisma.pointsLedger.aggregate({ _sum: { amount: true } }),
     ]);
 
-  const goalsWithProgress = goals.map((goal) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const goalsWithProgress = goals.map((goal: any) => {
     const log = goal.dailyLogs[0] ?? null;
     const streak = goal.streaks[0] ?? { id: "", currentStreak: 0, longestStreak: 0 };
     const activeSession = goal.timerSessions[0] ?? null;
