@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
       where: { date: { gte: from, lte: to } },
       orderBy: { date: "asc" },
     });
-    const dateMap = new Map(scores.map((s) => [s.date, s.score]));
+    const dateMap = new Map(scores.map((s: any) => [s.date, s.score]));
     return NextResponse.json(
       dates.map((d) => ({ date: d, score: dateMap.get(d) ?? 0 }))
     );

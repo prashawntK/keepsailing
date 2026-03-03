@@ -19,17 +19,17 @@ export async function GET(req: NextRequest) {
     prisma.streak.findFirst({ where: { goalId: null } }),
   ]);
 
-  const totalHours = logs.reduce((s, l) => s + l.timeSpent, 0);
+  const totalHours = logs.reduce((s: number, l: any) => s + l.timeSpent, 0);
   const avgScore =
     scores.length > 0
-      ? scores.reduce((s, sc) => s + sc.score, 0) / scores.length
+      ? scores.reduce((s: number, sc: any) => s + sc.score, 0) / scores.length
       : 0;
   const bestDay =
     scores.length > 0
-      ? scores.reduce((best, s) => (s.score > best.score ? s : best), scores[0])
+      ? scores.reduce((best: any, s: any) => (s.score > best.score ? s : best), scores[0])
       : null;
   const daysWithActivity = new Set(
-    logs.filter((l) => l.timeSpent > 0 || l.completed).map((l) => l.date)
+    logs.filter((l: any) => l.timeSpent > 0 || l.completed).map((l: any) => l.date)
   ).size;
   const consistencyRate =
     dates.length > 0
