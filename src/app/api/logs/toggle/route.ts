@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { todayString } from "@/lib/utils";
+import { withApiHandler } from "@/lib/api";
+import { persistDailyScore } from "@/lib/scoring-server";
 
-export async function POST(req: NextRequest) {
+export const POST = withApiHandler(async (req: NextRequest) => {
   const { goalId, date } = await req.json();
   const logDate = date ?? todayString();
 
@@ -27,5 +29,8 @@ export async function POST(req: NextRequest) {
     },
   });
 
+  // Persist today's score after toggle
+  persistDailyScore(logDate);
+
   return NextResponse.json(log);
-}
+});

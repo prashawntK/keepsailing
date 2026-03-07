@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { withApiHandler } from "@/lib/api";
 
-export async function PATCH(req: NextRequest) {
+export const PATCH = withApiHandler(async (req: NextRequest) => {
   const { orderedIds } = (await req.json()) as { orderedIds: string[] };
 
   if (!Array.isArray(orderedIds)) {
@@ -18,4 +19,4 @@ export async function PATCH(req: NextRequest) {
   );
 
   return NextResponse.json({ success: true });
-}
+});

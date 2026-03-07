@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { withApiHandler } from "@/lib/api";
 
-export async function GET(req: NextRequest) {
+export const GET = withApiHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const showArchived = searchParams.get("archived") === "true";
 
@@ -12,9 +13,9 @@ export async function GET(req: NextRequest) {
   });
 
   return NextResponse.json(goals);
-}
+});
 
-export async function POST(req: NextRequest) {
+export const POST = withApiHandler(async (req: NextRequest) => {
   const body = await req.json();
 
   const {
@@ -57,4 +58,4 @@ export async function POST(req: NextRequest) {
   await prisma.streak.create({ data: { goalId: goal.id } });
 
   return NextResponse.json(goal, { status: 201 });
-}
+});

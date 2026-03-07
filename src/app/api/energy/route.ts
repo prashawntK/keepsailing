@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { todayString } from "@/lib/utils";
+import { withApiHandler } from "@/lib/api";
 
-export async function GET(req: NextRequest) {
+export const GET = withApiHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const date = searchParams.get("date") ?? todayString();
   const logs = await prisma.energyLog.findMany({
@@ -10,9 +11,9 @@ export async function GET(req: NextRequest) {
     orderBy: { createdAt: "asc" },
   });
   return NextResponse.json(logs);
-}
+});
 
-export async function POST(req: NextRequest) {
+export const POST = withApiHandler(async (req: NextRequest) => {
   const { level, note } = await req.json();
   const now = new Date();
   const date = todayString();
@@ -21,4 +22,4 @@ export async function POST(req: NextRequest) {
     data: { date, time, level, note },
   });
   return NextResponse.json(log, { status: 201 });
-}
+});

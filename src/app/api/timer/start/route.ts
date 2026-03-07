@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { todayString } from "@/lib/utils";
+import { withApiHandler } from "@/lib/api";
 
-export async function POST(req: NextRequest) {
+export const POST = withApiHandler(async (req: NextRequest) => {
   const { goalId } = await req.json();
 
   // Stop any currently active session first
@@ -40,4 +41,4 @@ export async function POST(req: NextRequest) {
   });
 
   return NextResponse.json({ sessionId: session.id, date });
-}
+});

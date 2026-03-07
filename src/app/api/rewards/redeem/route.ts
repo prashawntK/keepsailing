@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { todayString } from "@/lib/utils";
+import { withApiHandler } from "@/lib/api";
 
-export async function POST(req: NextRequest) {
+export const POST = withApiHandler(async (req: NextRequest) => {
   const { rewardId } = await req.json();
 
   const reward = await prisma.reward.findUnique({ where: { id: rewardId } });
@@ -39,4 +40,4 @@ export async function POST(req: NextRequest) {
     entry,
     newBalance: balance - reward.cost,
   });
-}
+});

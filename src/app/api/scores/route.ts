@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { todayString, isGoalActiveOnDate } from "@/lib/utils";
-import { calculateDailyScore } from "@/lib/scoring";
+import { todayString } from "@/lib/utils";
+import { computeScoreForDate } from "@/lib/scoring-server";
+import { withApiHandler } from "@/lib/api";
 
-export async function GET(req: NextRequest) {
+export const GET = withApiHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const from = searchParams.get("from") ?? todayString();
   const to = searchParams.get("to") ?? todayString();
@@ -14,44 +15,13 @@ export async function GET(req: NextRequest) {
   });
 
   return NextResponse.json(scores);
-}
+});
 
-export async function POST(req: NextRequest) {
+export const POST = withApiHandler(async (req: NextRequest) => {
   const body = await req.json().catch(() => ({}));
   const date = (body as { date?: string }).date ?? todayString();
 
-  const goals = await prisma.goal.findMany({
-    where: { isArchived: false },
-    include: { dailyLogs: { where: { date } }, streaks: true },
-  });
-
-  const overallStreak = await prisma.streak.findFirst({
-    where: { goalId: null },
-  });
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const scoreGoals = goals.map((g: any) => {
-    const log = g.dailyLogs[0];
-    return {
-      goalType: g.goalType as "timer" | "checkbox",
-      dailyTarget: g.dailyTarget,
-      priority: g.priority,
-      isActiveToday: isGoalActiveOnDate(g.activeDays, date),
-      timeSpent: log?.timeSpent ?? 0,
-      completed: log?.completed ?? false,
-    };
-  });
-
-  const activeGoalStreaks = goals.filter(
-    (g: any) => (g.streaks[0]?.currentStreak ?? 0) > 0
-  ).length;
-  const overallStreakActive = (overallStreak?.currentStreak ?? 0) > 0;
-
-  const result = calculateDailyScore({
-    goals: scoreGoals,
-    activeGoalStreaks,
-    overallStreakActive,
-  });
+  const result = await computeScoreForDate(date);
 
   const score = await prisma.dailyScore.upsert({
     where: { date },
@@ -75,4 +45,4 @@ export async function POST(req: NextRequest) {
   });
 
   return NextResponse.json({ ...score, breakdown: result.breakdown });
-}
+});

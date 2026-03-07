@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { withApiHandler } from "@/lib/api";
 
-export async function GET(req: NextRequest) {
+export const GET = withApiHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const limit = parseInt(searchParams.get("limit") ?? "20");
 
@@ -14,4 +15,4 @@ export async function GET(req: NextRequest) {
   ]);
 
   return NextResponse.json({ balance: aggregate._sum.amount ?? 0, recent });
-}
+});

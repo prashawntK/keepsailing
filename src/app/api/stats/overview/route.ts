@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getLast30Days, getLast7Days } from "@/lib/utils";
+import { withApiHandler } from "@/lib/api";
 
-export async function GET(req: NextRequest) {
+export const GET = withApiHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const period = searchParams.get("period") ?? "month";
 
@@ -19,16 +20,20 @@ export async function GET(req: NextRequest) {
     prisma.streak.findFirst({ where: { goalId: null } }),
   ]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const totalHours = logs.reduce((s: number, l: any) => s + l.timeSpent, 0);
   const avgScore =
     scores.length > 0
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ? scores.reduce((s: number, sc: any) => s + sc.score, 0) / scores.length
       : 0;
   const bestDay =
     scores.length > 0
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ? scores.reduce((best: any, s: any) => (s.score > best.score ? s : best), scores[0])
       : null;
   const daysWithActivity = new Set(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     logs.filter((l: any) => l.timeSpent > 0 || l.completed).map((l: any) => l.date)
   ).size;
   const consistencyRate =
@@ -45,4 +50,4 @@ export async function GET(req: NextRequest) {
     topCategory: null,
     period,
   });
-}
+});

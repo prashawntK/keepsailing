@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { withApiHandler } from "@/lib/api";
+import { persistDailyScore } from "@/lib/scoring-server";
 
-export async function POST(req: NextRequest) {
+export const POST = withApiHandler(async (req: NextRequest) => {
   const { sessionId, focusRating, elapsed } = await req.json();
 
   const session = await prisma.timerSession.findUnique({
@@ -38,5 +40,8 @@ export async function POST(req: NextRequest) {
     },
   });
 
+  // Persist today's score after timer stop
+  persistDailyScore(session.date);
+
   return NextResponse.json({ session: updatedSession, log });
-}
+});

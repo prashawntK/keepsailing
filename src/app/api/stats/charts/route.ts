@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getLast30Days, getLast7Days } from "@/lib/utils";
+import { withApiHandler } from "@/lib/api";
 
-export async function GET(req: NextRequest) {
+export const GET = withApiHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const type = searchParams.get("type") ?? "daily_scores";
   const period = searchParams.get("period") ?? "month";
@@ -16,6 +17,7 @@ export async function GET(req: NextRequest) {
       where: { date: { gte: from, lte: to } },
       orderBy: { date: "asc" },
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dateMap = new Map(scores.map((s: any) => [s.date, s.score]));
     return NextResponse.json(
       dates.map((d) => ({ date: d, score: dateMap.get(d) ?? 0 }))
@@ -56,4 +58,4 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json([]);
-}
+});

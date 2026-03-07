@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { todayString } from "@/lib/utils";
+import { withApiHandler } from "@/lib/api";
 
-export async function GET() {
+export const GET = withApiHandler(async () => {
   const streaks = await prisma.streak.findMany({ include: { goal: true } });
   return NextResponse.json(streaks);
-}
+});
 
-export async function POST(req: NextRequest) {
+export const POST = withApiHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const action = searchParams.get("action");
 
@@ -42,4 +43,4 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ error: "Unknown action" }, { status: 400 });
-}
+});

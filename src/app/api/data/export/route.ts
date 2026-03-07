@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { withApiHandler } from "@/lib/api";
 
-export async function GET() {
+export const GET = withApiHandler(async () => {
   const [goals, dailyLogs, timerSessions, streaks, dailyScores, rewards, journal, energy] =
     await Promise.all([
       prisma.goal.findMany(),
@@ -33,4 +34,4 @@ export async function GET() {
       "Content-Disposition": `attachment; filename="adhd-scorecard-export-${new Date().toISOString().slice(0, 10)}.json"`,
     },
   });
-}
+});
