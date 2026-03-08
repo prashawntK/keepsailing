@@ -47,6 +47,7 @@ export const GET = withApiHandler(async (req: NextRequest) => {
     bestDay: bestDay ? { date: bestDay.date, score: bestDay.score } : null,
     consistencyRate,
     currentOverallStreak: overallStreak?.currentStreak ?? 0,
+    daysWithActivity,
     topCategory: null,
     period,
   });

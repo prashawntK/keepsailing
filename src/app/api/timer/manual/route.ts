@@ -38,7 +38,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   });
 
   // Persist today's score after manual time entry
-  persistDailyScore(logDate);
+  await persistDailyScore(logDate);
 
   return NextResponse.json(log);
 });

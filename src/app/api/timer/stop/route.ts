@@ -41,7 +41,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   });
 
   // Persist today's score after timer stop
-  persistDailyScore(session.date);
+  await persistDailyScore(session.date);
 
   return NextResponse.json({ session: updatedSession, log });
 });

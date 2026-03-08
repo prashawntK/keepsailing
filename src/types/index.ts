@@ -103,6 +103,7 @@ export interface OverviewStats {
   bestDay: { date: string; score: number } | null;
   consistencyRate: number;  // % of days with score > 0
   currentOverallStreak: number;
+  daysWithActivity: number;
   totalGoalsCompleted: number;
   topCategory: string | null;
 }

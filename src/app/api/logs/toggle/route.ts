@@ -30,7 +30,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   });
 
   // Persist today's score after toggle
-  persistDailyScore(logDate);
+  await persistDailyScore(logDate);
 
   return NextResponse.json(log);
 });

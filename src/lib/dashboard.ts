@@ -110,7 +110,7 @@ export async function assembleDashboardData(date?: string): Promise<DashboardDat
   const scoreResult = calculateDailyScore(scoreInput);
 
   // Persist today's score so charts and stats have historical data
-  persistDailyScore(d);
+  await persistDailyScore(d);
 
   return {
     goals: goalsWithProgress,

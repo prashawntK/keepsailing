@@ -8,6 +8,7 @@ interface StatsOverviewCardsProps {
   bestDay: { date: string; score: number } | null;
   consistencyRate: number;
   currentOverallStreak: number;
+  daysWithActivity: number;
 }
 
 export function StatsOverviewCards({
@@ -16,6 +17,7 @@ export function StatsOverviewCards({
   bestDay,
   consistencyRate,
   currentOverallStreak,
+  daysWithActivity,
 }: StatsOverviewCardsProps) {
   const cards = [
     {
@@ -56,7 +58,7 @@ export function StatsOverviewCards({
     {
       icon: Target,
       label: "Days Active",
-      value: bestDay ? "—" : "0",
+      value: String(daysWithActivity),
       color: "text-xp",
       bg: "bg-xp/10",
     },

@@ -22,7 +22,7 @@ export default function StatsPage() {
       fetch(`/api/stats/overview?period=${period}`).then((r) => r.json()),
       fetch(`/api/stats/charts?type=daily_scores&period=${period}`).then((r) => r.json()),
       fetch(`/api/stats/charts?type=category_breakdown&period=${period}`).then((r) => r.json()),
-      fetch(`/api/scores?from=${getLast365Days()[0]}&to=${getLast365Days()[364]}`).then((r) => r.json()),
+      fetch(`/api/scores?from=${getLast365Days()[0]}&to=${getLast365Days()[364]}&fill=true`).then((r) => r.json()),
     ]);
     setOverview(ov);
     setScoreTrend(trend);
@@ -64,6 +64,7 @@ export default function StatsPage() {
           bestDay={overview.bestDay}
           consistencyRate={overview.consistencyRate}
           currentOverallStreak={overview.currentOverallStreak}
+          daysWithActivity={overview.daysWithActivity ?? 0}
         />
       )}
 
