@@ -51,32 +51,54 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
   }
 
   async function handleCheckboxToggle() {
-    // Optimistic update — flip immediately
-    const newVal = !displayCompleted;
-    setOptimisticCompleted(newVal);
+    const hasSteps = goal.steps.length > 0;
 
-    try {
-      await fetch("/api/logs/toggle", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ goalId: goal.id }),
-      });
-      // Silent background refresh to sync score/streak
-      onRefresh();
-    } catch {
-      // Revert on error
-      setOptimisticCompleted(!newVal);
+    if (!hasSteps) {
+      // No steps — simple toggle with optimistic UI
+      const newVal = !displayCompleted;
+      setOptimisticCompleted(newVal);
+      try {
+        await fetch("/api/logs/toggle", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ goalId: goal.id }),
+        });
+        onRefresh();
+      } catch {
+        setOptimisticCompleted(!newVal);
+      }
+    } else {
+      // Has steps — advancing one step doesn't complete the goal.
+      // Don't set optimistic state; let refresh show correct state.
+      try {
+        await fetch("/api/logs/toggle", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ goalId: goal.id }),
+        });
+        onRefresh();
+      } catch {
+        // nothing to revert
+      }
     }
   }
 
   async function handleCompleteStep() {
     if (!goal.currentStep) return;
-    await fetch("/api/steps/complete", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stepId: goal.currentStep.id }),
-    });
-    onRefresh();
+    try {
+      const res = await fetch("/api/steps/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stepId: goal.currentStep.id }),
+      });
+      if (!res.ok) {
+        console.error("Failed to complete step:", await res.text());
+        return;
+      }
+      onRefresh();
+    } catch (err) {
+      console.error("Error completing step:", err);
+    }
   }
 
   async function handleManualAdd() {

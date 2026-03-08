@@ -45,6 +45,34 @@
 html.light {
   --background: #f9fafb;
   --foreground: #0B0F19;
+
+  /* Surface hierarchy — light equivalents */
+  --color-surface-base: #f9fafb;
+  --color-surface-1:    #ffffff;
+  --color-surface-2:    #f3f4f6;
+  --color-surface-3:    #e5e7eb;
+  --color-surface-4:    #d1d5db;
+
+  /* Primary — slightly darker for contrast on white */
+  --color-primary:        #ea580c;
+  --color-primary-light:  #f97316;
+  --color-primary-muted:  #fed7aa;
+  --color-primary-subtle: #fff7ed;
+
+  /* Semantic vivid — darker for light bg contrast */
+  --color-success: #16a34a;
+  --color-streak:  #d97706;
+  --color-warning: #ca8a04;
+  --color-error:   #dc2626;
+  --color-xp:      #7c3aed;
+  --color-info:    #0284c7;
+
+  /* Semantic muted — flip from dark tints to light tints */
+  --color-success-muted: #dcfce7;
+  --color-streak-muted:  #fef3c7;
+  --color-error-muted:   #fee2e2;
+  --color-xp-muted:      #ede9fe;
+  --color-info-muted:    #e0f2fe;
 }
 
 * { box-sizing: border-box; }
@@ -98,4 +126,14 @@ body {
   background: var(--color-surface-2);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
+}
+
+html.light .card {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+html.light .card-elevated {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+html.light ::-webkit-scrollbar-thumb {
+  background: var(--color-surface-4);
 }

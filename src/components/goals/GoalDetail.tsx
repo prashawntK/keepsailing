@@ -25,6 +25,21 @@ export function GoalDetail({ goal, onClose, onRefresh }: GoalDetailProps) {
     onClose();
   }
 
+  async function handleCompleteStep(stepId: string) {
+    try {
+      const res = await fetch("/api/steps/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stepId }),
+      });
+      if (!res.ok) return;
+      onRefresh();
+      onClose();
+    } catch {
+      // silent
+    }
+  }
+
   const completedCount = goal.steps.filter((s) => s.completedAt !== null).length;
 
   return (
@@ -92,9 +107,12 @@ export function GoalDetail({ goal, onClose, onRefresh }: GoalDetailProps) {
                 </div>
 
                 {isCurrent && (
-                  <span className="text-xs bg-primary/20 text-primary-light px-1.5 py-0.5 rounded-full flex-shrink-0">
-                    Current
-                  </span>
+                  <button
+                    onClick={() => handleCompleteStep(step.id)}
+                    className="text-xs bg-success/15 text-success hover:bg-success/25 px-2.5 py-1 rounded-full flex-shrink-0 transition-all font-medium"
+                  >
+                    Complete ✓
+                  </button>
                 )}
               </div>
             );
