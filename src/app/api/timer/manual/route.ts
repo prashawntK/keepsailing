@@ -13,6 +13,12 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   if (!goal)
     return NextResponse.json({ error: "Goal not found" }, { status: 404 });
 
+  // Attach current step if this goal has steps
+  const currentStep = await prisma.step.findFirst({
+    where: { goalId, completedAt: null },
+    orderBy: { sortOrder: "asc" },
+  });
+
   await prisma.timerSession.create({
     data: {
       goalId,
@@ -23,6 +29,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
       sessionType: "manual",
       focusRating: focusRating ?? null,
       isActive: false,
+      stepId: currentStep?.id ?? null,
     },
   });
 

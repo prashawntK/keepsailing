@@ -110,7 +110,7 @@ export function DashboardView({ initialData }: DashboardViewProps) {
       <DailyWin />
 
       {/* Floating timer */}
-      <TimerDisplay onRefresh={refresh} />
+      <TimerDisplay onRefresh={refresh} goals={data.goals} />
     </div>
   );
 }

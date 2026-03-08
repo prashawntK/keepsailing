@@ -9,7 +9,7 @@ export const GET = withApiHandler(async (req: NextRequest) => {
   const goals = await prisma.goal.findMany({
     where: { isArchived: showArchived },
     orderBy: { sortOrder: "asc" },
-    include: { streaks: true },
+    include: { streaks: true, steps: { orderBy: { sortOrder: "asc" } } },
   });
 
   return NextResponse.json(goals);
@@ -30,6 +30,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     motivation,
     pomodoroSettings,
     sortOrder = 0,
+    steps = [],
   } = body;
 
   if (!name || !category) {
@@ -38,6 +39,8 @@ export const POST = withApiHandler(async (req: NextRequest) => {
       { status: 400 }
     );
   }
+
+  const validSteps = (steps as { name: string }[]).filter((s) => s.name?.trim());
 
   const goal = await prisma.goal.create({
     data: {
@@ -52,6 +55,11 @@ export const POST = withApiHandler(async (req: NextRequest) => {
       motivation,
       pomodoroSettings,
       sortOrder,
+      ...(validSteps.length > 0 && {
+        steps: {
+          create: validSteps.map((s, i) => ({ name: s.name.trim(), sortOrder: i })),
+        },
+      }),
     },
   });
 

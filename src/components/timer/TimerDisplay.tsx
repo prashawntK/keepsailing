@@ -4,12 +4,16 @@ import { useState } from "react";
 import { Square, Star } from "lucide-react";
 import { useTimer } from "@/components/providers/TimerProvider";
 
+import type { GoalWithProgress } from "@/types";
+
 interface TimerDisplayProps {
   onRefresh: () => void;
+  goals?: GoalWithProgress[];
 }
 
-export function TimerDisplay({ onRefresh }: TimerDisplayProps) {
+export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
   const { timerState, displayTime, stopTimer } = useTimer();
+  const activeGoal = goals?.find((g) => g.id === timerState.goalId);
   const [showRating, setShowRating] = useState(false);
   const [rating, setRating] = useState(0);
 
@@ -32,7 +36,9 @@ export function TimerDisplay({ onRefresh }: TimerDisplayProps) {
         {!showRating ? (
           <div className="flex items-center gap-3 p-3">
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-primary font-medium mb-0.5">Timer running</p>
+              <p className="text-xs text-primary font-medium mb-0.5">
+                Timer running{activeGoal?.currentStep ? ` · ${activeGoal.currentStep.name}` : ""}
+              </p>
               <p className="text-2xl font-mono font-bold text-gray-100 tabular-nums">
                 {displayTime}
               </p>

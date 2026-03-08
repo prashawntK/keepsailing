@@ -7,13 +7,23 @@ import { Modal } from "@/components/ui/Modal";
 import { GoalForm, type GoalFormData } from "./GoalForm";
 import type { Goal } from "@/types";
 
+interface GoalWithSteps extends Goal {
+  steps?: { id: string; name: string; sortOrder: number; completedAt: Date | null }[];
+}
+
 interface GoalListProps {
   goals: Goal[];
   onRefresh: () => void;
 }
 
 export function GoalList({ goals, onRefresh }: GoalListProps) {
-  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  const [editingGoal, setEditingGoal] = useState<GoalWithSteps | null>(null);
+
+  async function handleEditClick(goal: Goal) {
+    const res = await fetch(`/api/goals/${goal.id}`);
+    const full = await res.json();
+    setEditingGoal(full);
+  }
 
   async function handleEdit(data: GoalFormData) {
     if (!editingGoal) return;
@@ -81,7 +91,7 @@ export function GoalList({ goals, onRefresh }: GoalListProps) {
               {!goal.isArchived ? (
                 <>
                   <button
-                    onClick={() => setEditingGoal(goal)}
+                    onClick={() => handleEditClick(goal)}
                     className="p-2 rounded-lg text-gray-500 hover:text-gray-200 hover:bg-surface-2"
                   >
                     <Pencil size={14} />
@@ -125,6 +135,7 @@ export function GoalList({ goals, onRefresh }: GoalListProps) {
                 : [0, 1, 2, 3, 4, 5, 6],
               description: editingGoal.description ?? "",
               motivation: editingGoal.motivation ?? "",
+              steps: (editingGoal.steps ?? []).map((s) => ({ id: s.id, name: s.name })),
             }}
             onSubmit={handleEdit}
             onCancel={() => setEditingGoal(null)}

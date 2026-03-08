@@ -36,8 +36,15 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   }
 
   const date = todayString();
+
+  // Attach current step if this goal has steps
+  const currentStep = await prisma.step.findFirst({
+    where: { goalId, completedAt: null },
+    orderBy: { sortOrder: "asc" },
+  });
+
   const session = await prisma.timerSession.create({
-    data: { goalId, date, startTime: new Date(), isActive: true },
+    data: { goalId, date, startTime: new Date(), isActive: true, stepId: currentStep?.id ?? null },
   });
 
   return NextResponse.json({ sessionId: session.id, date });

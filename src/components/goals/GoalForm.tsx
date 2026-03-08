@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +30,7 @@ export interface GoalFormData {
   activeDays: number[];
   description: string;
   motivation: string;
+  steps: { id?: string; name: string }[];
 }
 
 export function GoalForm({ initial, onSubmit, onCancel, submitLabel = "Save Goal" }: GoalFormProps) {
@@ -42,8 +44,19 @@ export function GoalForm({ initial, onSubmit, onCancel, submitLabel = "Save Goal
     activeDays: initial?.activeDays ?? [0, 1, 2, 3, 4, 5, 6],
     description: initial?.description ?? "",
     motivation: initial?.motivation ?? "",
+    steps: initial?.steps ?? [],
   });
   const [loading, setLoading] = useState(false);
+
+  function addStep() {
+    setForm((f) => ({ ...f, steps: [...f.steps, { name: "" }] }));
+  }
+  function removeStep(index: number) {
+    setForm((f) => ({ ...f, steps: f.steps.filter((_, i) => i !== index) }));
+  }
+  function updateStep(index: number, name: string) {
+    setForm((f) => ({ ...f, steps: f.steps.map((s, i) => (i === index ? { ...s, name } : s)) }));
+  }
 
   function toggleDay(d: number) {
     setForm((f) => ({
@@ -206,6 +219,40 @@ export function GoalForm({ initial, onSubmit, onCancel, submitLabel = "Save Goal
         onChange={(e) => setForm((f) => ({ ...f, motivation: e.target.value }))}
         className={cn(field, "resize-none h-16")}
       />
+
+      {/* Steps */}
+      <div>
+        <label className="text-xs text-gray-500 mb-1.5 block">
+          Steps <span className="text-gray-600">(optional — break into sequential sub-tasks)</span>
+        </label>
+        <div className="space-y-2">
+          {form.steps.map((step, i) => (
+            <div key={i} className="flex gap-2 items-center">
+              <span className="text-xs text-gray-600 w-5 flex-shrink-0">{i + 1}.</span>
+              <input
+                value={step.name}
+                onChange={(e) => updateStep(i, e.target.value)}
+                placeholder={`Step ${i + 1}`}
+                className={cn(field, "flex-1")}
+              />
+              <button
+                type="button"
+                onClick={() => removeStep(i)}
+                className="p-1 text-gray-500 hover:text-error transition-colors flex-shrink-0"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={addStep}
+          className="mt-2 text-xs text-primary hover:text-primary-light flex items-center gap-1 transition-colors"
+        >
+          <Plus size={12} /> Add step
+        </button>
+      </div>
 
       {/* Actions */}
       <div className="flex gap-3 pt-2">

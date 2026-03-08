@@ -1,0 +1,17 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import { withApiHandler } from "@/lib/api";
+
+export const POST = withApiHandler(async (req: NextRequest) => {
+  const { stepId } = await req.json();
+
+  const step = await prisma.step.findUnique({ where: { id: stepId } });
+  if (!step) return NextResponse.json({ error: "Step not found" }, { status: 404 });
+
+  const updated = await prisma.step.update({
+    where: { id: stepId },
+    data: { completedAt: null },
+  });
+
+  return NextResponse.json(updated);
+});

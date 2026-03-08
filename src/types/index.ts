@@ -10,7 +10,15 @@ export type {
   JournalEntry,
   EnergyLog,
   AppSettings,
+  Step,
 } from "@prisma/client";
+
+export interface StepData {
+  id: string;
+  name: string;
+  sortOrder: number;
+  completedAt: string | null; // ISO string or null
+}
 
 // ── Extended / computed types ─────────────────────────────────────────────
 
@@ -52,6 +60,10 @@ export interface GoalWithProgress {
 
   completionPercentage: number;
   isActiveToday: boolean;
+
+  // Steps (optional — goals may have 0 steps)
+  steps: StepData[];
+  currentStep: StepData | null; // first incomplete step by sortOrder
 }
 
 export interface DashboardData {

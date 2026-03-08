@@ -27,6 +27,7 @@ export async function assembleDashboardData(date?: string): Promise<DashboardDat
           dailyLogs: { where: { date: d } },
           streaks: true,
           timerSessions: { where: { isActive: true } },
+          steps: { orderBy: { sortOrder: "asc" } },
         },
       }),
       prisma.streak.findFirst({ where: { goalId: null } }),
@@ -88,6 +89,16 @@ export async function assembleDashboardData(date?: string): Promise<DashboardDat
         : null,
       completionPercentage: Math.round(completionPercentage),
       isActiveToday,
+      steps: (goal.steps ?? []).map((s: any) => ({
+        id: s.id,
+        name: s.name,
+        sortOrder: s.sortOrder,
+        completedAt: s.completedAt?.toISOString() ?? null,
+      })),
+      currentStep: (() => {
+        const s = (goal.steps ?? []).find((s: any) => s.completedAt === null);
+        return s ? { id: s.id, name: s.name, sortOrder: s.sortOrder, completedAt: null } : null;
+      })(),
     };
   });
 

@@ -117,8 +117,11 @@ export function DecisionHelper({ goals, energyLevel, onStartTimer }: DecisionHel
                   {i === 0 && <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full">Top pick</span>}
                   <span className="font-medium text-gray-100">{item.goal.name}</span>
                 </div>
+                {item.goal.currentStep && (
+                  <p className="text-xs text-primary-light/70 mt-0.5">→ {item.goal.currentStep.name}</p>
+                )}
                 {item.reasons.length > 0 && (
-                  <p className="text-xs text-gray-500 mt-1">{item.reasons.join(" · ")}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{item.reasons.join(" · ")}</p>
                 )}
               </div>
               <Play size={16} className="text-gray-500 flex-shrink-0 mt-1" />

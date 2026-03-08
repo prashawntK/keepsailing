@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Timer, Check, Plus } from "lucide-react";
+import { Timer, Check, Plus, ChevronRight } from "lucide-react";
 import { cn, formatHours, getStatusBg, CATEGORY_COLORS, PRIORITY_COLORS } from "@/lib/utils";
 import { StreakBadge } from "@/components/dashboard/StreakBadge";
 import { ProgressRing } from "@/components/ui/ProgressRing";
 import { useTimer } from "@/components/providers/TimerProvider";
+import { GoalDetail } from "@/components/goals/GoalDetail";
 import type { GoalWithProgress } from "@/types";
 
 interface GoalCardProps {
@@ -21,6 +22,7 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
   const [optimisticTime, setOptimisticTime] = useState<number | null>(null);
   const [showManual, setShowManual] = useState(false);
   const [manualMinutes, setManualMinutes] = useState("30");
+  const [showDetail, setShowDetail] = useState(false);
 
   const isActive = timerState.goalId === goal.id && timerState.isRunning;
 
@@ -65,6 +67,16 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
       // Revert on error
       setOptimisticCompleted(!newVal);
     }
+  }
+
+  async function handleCompleteStep() {
+    if (!goal.currentStep) return;
+    await fetch("/api/steps/complete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stepId: goal.currentStep.id }),
+    });
+    onRefresh();
   }
 
   async function handleManualAdd() {
@@ -125,12 +137,30 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-gray-100 truncate">{goal.name}</span>
+            <button
+              onClick={() => setShowDetail(true)}
+              className="font-semibold text-gray-100 truncate hover:text-primary-light transition-colors text-left"
+            >
+              {goal.name}
+            </button>
             <span className={cn("text-xs px-1.5 py-0.5 rounded-full font-medium", PRIORITY_COLORS[goal.priority])}>
               {goal.priority}
             </span>
             <span className={cn("text-xs", CATEGORY_COLORS[goal.category])}>{goal.category}</span>
           </div>
+
+          {/* Current step indicator */}
+          {goal.currentStep && (
+            <div className="mt-0.5 flex items-center gap-1">
+              <ChevronRight size={10} className="text-gray-600 flex-shrink-0" />
+              <span className="text-xs text-primary-light font-medium truncate">{goal.currentStep.name}</span>
+              {goal.steps.length > 1 && (
+                <span className="text-xs text-gray-600 flex-shrink-0">
+                  ({goal.steps.filter((s) => s.completedAt !== null).length + 1}/{goal.steps.length})
+                </span>
+              )}
+            </div>
+          )}
 
           {goal.goalType === "timer" && (
             <div className="mt-1 flex items-center gap-2 text-sm text-gray-400">
@@ -171,6 +201,15 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
             >
               <Plus size={14} />
             </button>
+            {goal.currentStep && (
+              <button
+                onClick={handleCompleteStep}
+                title="Complete current step"
+                className="p-2 rounded-xl bg-success/15 text-success hover:bg-success/25 transition-all"
+              >
+                <Check size={14} />
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -205,6 +244,15 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
       {/* Active timer pulse */}
       {isActive && (
         <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary animate-pulse" />
+      )}
+
+      {/* Goal detail modal */}
+      {showDetail && (
+        <GoalDetail
+          goal={goal}
+          onClose={() => setShowDetail(false)}
+          onRefresh={onRefresh}
+        />
       )}
     </div>
   );

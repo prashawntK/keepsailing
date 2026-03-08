@@ -57,5 +57,29 @@ export const GET = withApiHandler(async (req: NextRequest) => {
     );
   }
 
+  if (type === "hours_by_step") {
+    const goalId = searchParams.get("goalId");
+    if (!goalId) return NextResponse.json({ error: "goalId required" }, { status: 400 });
+
+    const sessions = await prisma.timerSession.findMany({
+      where: { goalId, date: { gte: from, lte: to }, stepId: { not: null } },
+      include: { step: { select: { name: true, sortOrder: true } } },
+    });
+
+    const byStep: Record<string, { hours: number; sortOrder: number }> = {};
+    for (const session of sessions) {
+      const name = session.step?.name ?? "Unknown";
+      const sortOrder = session.step?.sortOrder ?? 999;
+      if (!byStep[name]) byStep[name] = { hours: 0, sortOrder };
+      byStep[name].hours += session.duration;
+    }
+
+    return NextResponse.json(
+      Object.entries(byStep)
+        .sort((a, b) => a[1].sortOrder - b[1].sortOrder)
+        .map(([name, { hours }]) => ({ name, hours: Math.round(hours * 100) / 100 }))
+    );
+  }
+
   return NextResponse.json([]);
 });

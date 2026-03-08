@@ -5,29 +5,40 @@ import { ScoreTrendChart } from "@/components/stats/ScoreTrendChart";
 import { CategoryPieChart } from "@/components/stats/CategoryPieChart";
 import { StreakCalendar } from "@/components/stats/StreakCalendar";
 import { StatsOverviewCards } from "@/components/stats/StatsOverviewCards";
+import { StepBreakdownCard } from "@/components/stats/StepBreakdownCard";
 import { getLast365Days } from "@/lib/utils";
 import type { OverviewStats } from "@/types";
 
 type Period = "week" | "month";
 
+interface GoalSummary {
+  id: string;
+  name: string;
+  emoji: string;
+  steps: { id: string }[];
+}
+
 export default function StatsPage() {
   const [period, setPeriod] = useState<Period>("month");
   const [overview, setOverview] = useState<OverviewStats | null>(null);
+  const [goalsWithSteps, setGoalsWithSteps] = useState<GoalSummary[]>([]);
   const [scoreTrend, setScoreTrend] = useState<{ date: string; score: number }[]>([]);
   const [categoryData, setCategoryData] = useState<{ name: string; value: number }[]>([]);
   const [yearScores, setYearScores] = useState<{ date: string; score: number }[]>([]);
 
   const fetchData = useCallback(async () => {
-    const [ov, trend, cat, yearData] = await Promise.all([
+    const [ov, trend, cat, yearData, goals] = await Promise.all([
       fetch(`/api/stats/overview?period=${period}`).then((r) => r.json()),
       fetch(`/api/stats/charts?type=daily_scores&period=${period}`).then((r) => r.json()),
       fetch(`/api/stats/charts?type=category_breakdown&period=${period}`).then((r) => r.json()),
       fetch(`/api/scores?from=${getLast365Days()[0]}&to=${getLast365Days()[364]}&fill=true`).then((r) => r.json()),
+      fetch(`/api/goals`).then((r) => r.json()),
     ]);
     setOverview(ov);
     setScoreTrend(trend);
     setCategoryData(cat);
     setYearScores(yearData);
+    setGoalsWithSteps((goals ?? []).filter((g: GoalSummary) => g.steps?.length > 0));
   }, [period]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -87,6 +98,22 @@ export default function StatsPage() {
         </h2>
         <StreakCalendar scores={yearScores} />
       </div>
+
+      {/* Step breakdown per goal */}
+      {goalsWithSteps.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Step Breakdown</h2>
+          {goalsWithSteps.map((goal) => (
+            <StepBreakdownCard
+              key={goal.id}
+              goalId={goal.id}
+              goalName={goal.name}
+              goalEmoji={goal.emoji}
+              period={period}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

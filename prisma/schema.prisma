@@ -32,6 +32,7 @@ model Goal {
   dailyLogs     DailyLog[]
   timerSessions TimerSession[]
   streaks       Streak[]
+  steps         Step[]
 
   @@index([isArchived])
   @@index([category])
@@ -74,11 +75,15 @@ model TimerSession {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  stepId String?
+  step   Step?  @relation(fields: [stepId], references: [id], onDelete: SetNull)
+
   goal Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
 
   @@index([goalId, date])
   @@index([isActive])
   @@index([date])
+  @@index([stepId])
 }
 
 model Streak {
@@ -98,6 +103,23 @@ model Streak {
   goal Goal? @relation(fields: [goalId], references: [id], onDelete: Cascade)
 
   @@unique([goalId])
+  @@index([goalId])
+}
+
+model Step {
+  id          String    @id @default(cuid())
+  goalId      String
+  name        String
+  sortOrder   Int       @default(0)
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  goal          Goal           @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  timerSessions TimerSession[]
+
+  @@index([goalId, sortOrder])
   @@index([goalId])
 }
 

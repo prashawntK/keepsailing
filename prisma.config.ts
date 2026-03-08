@@ -9,9 +9,8 @@ export default defineConfig({
     seed: "npx tsx prisma/seed.ts",
   },
   datasource: {
-    // Use DATABASE_URL for queries. For Supabase with pgBouncer (pooled connection),
-    // Prisma Migrate needs the direct connection — set DATABASE_URL to the direct URL
-    // (port 5432) when running migrations, and to the pooler URL (port 6543) at runtime.
+    // DATABASE_URL = pooler (port 6543) used by the runtime query engine
+    // For migrations use DIRECT_URL (override DATABASE_URL at CLI level)
     url: process.env["DATABASE_URL"]!,
   },
 });
