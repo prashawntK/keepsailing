@@ -1,5 +1,7 @@
 "use client";
 
+import { useTheme } from "@/components/providers/ThemeProvider";
+
 interface ProgressRingProps {
   percentage: number;   // 0-100
   size?: number;
@@ -14,9 +16,12 @@ export function ProgressRing({
   size = 120,
   strokeWidth = 10,
   color = "#F97316",
-  trackColor = "#1f2937",
+  trackColor,
   children,
 }: ProgressRingProps) {
+  const { theme } = useTheme();
+  const resolvedTrackColor = trackColor ?? (theme === "light" ? "#E2E8F0" : "#1f2937");
+
   const r = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * r;
   const offset = circumference - (Math.min(percentage, 100) / 100) * circumference;
@@ -30,7 +35,7 @@ export function ProgressRing({
           cy={size / 2}
           r={r}
           fill="none"
-          stroke={trackColor}
+          stroke={resolvedTrackColor}
           strokeWidth={strokeWidth}
         />
         {/* Progress */}

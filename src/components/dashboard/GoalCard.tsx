@@ -131,7 +131,7 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
         isActive && "ring-2 ring-primary/60"
       )}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-center gap-3">
         {/* Emoji + progress ring for timer goals */}
         <div className="relative flex-shrink-0">
           {goal.goalType === "timer" ? (
@@ -145,13 +145,13 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
             <button
               onClick={handleCheckboxToggle}
               className={cn(
-                "w-11 h-11 rounded-full border-2 flex items-center justify-center text-lg transition-all duration-150",
+                "w-9 h-9 rounded-full border-2 flex items-center justify-center text-base transition-all duration-150",
                 displayCompleted
                   ? "border-success bg-success/20 scale-105"
                   : "border-surface-4 bg-surface-2 hover:border-surface-3"
               )}
             >
-              {displayCompleted ? <Check size={18} className="text-success" /> : goal.emoji}
+              {displayCompleted ? <Check size={16} className="text-success" /> : goal.emoji}
             </button>
           )}
         </div>
@@ -173,11 +173,11 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
 
           {/* Current step indicator */}
           {goal.currentStep && (
-            <div className="mt-0.5 flex items-center gap-1">
-              <ChevronRight size={10} className="text-gray-600 flex-shrink-0" />
-              <span className="text-xs text-primary-light font-medium truncate">{goal.currentStep.name}</span>
+            <div className="mt-1 flex items-center gap-1">
+              <ChevronRight size={12} className="text-gray-600 flex-shrink-0" />
+              <span className="text-sm text-primary-light font-medium truncate">{goal.currentStep.name}</span>
               {goal.steps.length > 1 && (
-                <span className="text-xs text-gray-600 flex-shrink-0">
+                <span className="text-xs text-gray-500 flex-shrink-0">
                   ({goal.steps.filter((s) => s.completedAt !== null).length + 1}/{goal.steps.length})
                 </span>
               )}
@@ -205,7 +205,7 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
 
         {/* Timer actions */}
         {goal.goalType === "timer" && (
-          <div className="flex flex-col gap-2 flex-shrink-0">
+          <div className="flex flex-row gap-1.5 flex-shrink-0">
             <button
               onClick={handleTimerClick}
               className={cn(

@@ -38,7 +38,7 @@ export default function StatsPage() {
     setScoreTrend(trend);
     setCategoryData(cat);
     setYearScores(yearData);
-    setGoalsWithSteps((goals ?? []).filter((g: GoalSummary) => g.steps?.length > 0));
+    setGoalsWithSteps(goals ?? []);
   }, [period]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -102,7 +102,7 @@ export default function StatsPage() {
       {/* Step breakdown per goal */}
       {goalsWithSteps.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Step Breakdown</h2>
+          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Goal Breakdown</h2>
           {goalsWithSteps.map((goal) => (
             <StepBreakdownCard
               key={goal.id}

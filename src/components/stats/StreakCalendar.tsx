@@ -1,21 +1,32 @@
 "use client";
 
 import { getLast365Days, formatDateDisplay } from "@/lib/utils";
+import { useTheme } from "@/components/providers/ThemeProvider";
 
 interface StreakCalendarProps {
   scores: Array<{ date: string; score: number }>;
 }
 
-function getColor(score: number): string {
+function getColor(score: number, isLight: boolean): string {
+  if (isLight) {
+    if (score === 0) return "#F1F5F9"; // slate-100 — no activity
+    if (score < 30)  return "#DBEAFE"; // blue-100
+    if (score < 50)  return "#FEF3C7"; // amber-100
+    if (score < 70)  return "#FDE68A"; // amber-200
+    if (score < 90)  return "#86EFAC"; // green-300
+    return "#F97316";                   // orange
+  }
   if (score === 0) return "#111827";
-  if (score < 30) return "#1f2937";
-  if (score < 50) return "#7f1d1d";
-  if (score < 70) return "#ca8a04";
-  if (score < 85) return "#16a34a";
+  if (score < 30)  return "#1f2937";
+  if (score < 50)  return "#7f1d1d";
+  if (score < 70)  return "#ca8a04";
+  if (score < 85)  return "#16a34a";
   return "#F97316";
 }
 
 export function StreakCalendar({ scores }: StreakCalendarProps) {
+  const { theme } = useTheme();
+  const isLight = theme === "light";
   const days = getLast365Days();
   const scoreMap = new Map(scores.map((s) => [s.date, s.score]));
 
@@ -52,7 +63,7 @@ export function StreakCalendar({ scores }: StreakCalendarProps) {
                   key={day}
                   title={`${formatDateDisplay(day)}: ${Math.round(score)}`}
                   className="w-3 h-3 rounded-sm transition-all hover:scale-125 cursor-default"
-                  style={{ backgroundColor: getColor(score) }}
+                  style={{ backgroundColor: getColor(score, isLight) }}
                 />
               );
             })}
@@ -67,7 +78,7 @@ export function StreakCalendar({ scores }: StreakCalendarProps) {
           <div
             key={s}
             className="w-3 h-3 rounded-sm"
-            style={{ backgroundColor: getColor(s) }}
+            style={{ backgroundColor: getColor(s, isLight) }}
           />
         ))}
         <span className="text-xs text-gray-500">More</span>

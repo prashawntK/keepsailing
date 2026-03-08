@@ -43,36 +43,52 @@
 }
 
 html.light {
-  --background: #f9fafb;
-  --foreground: #0B0F19;
+  --background: #F1F5F9;
+  --foreground: #0F172A;
 
-  /* Surface hierarchy — light equivalents */
-  --color-surface-base: #f9fafb;
-  --color-surface-1:    #ffffff;
-  --color-surface-2:    #f3f4f6;
-  --color-surface-3:    #e5e7eb;
-  --color-surface-4:    #d1d5db;
+  /* Surface hierarchy — Cool Slate */
+  --color-surface-base: #F1F5F9;
+  --color-surface-1:    #FFFFFF;
+  --color-surface-2:    #F8FAFC;
+  --color-surface-3:    #E2E8F0;
+  --color-surface-4:    #CBD5E1;
 
-  /* Primary — slightly darker for contrast on white */
-  --color-primary:        #ea580c;
-  --color-primary-light:  #f97316;
-  --color-primary-muted:  #fed7aa;
-  --color-primary-subtle: #fff7ed;
+  /* Primary — orange-600 for better contrast on slate background */
+  --color-primary:        #EA580C;
+  --color-primary-light:  #F97316;
+  --color-primary-muted:  #FED7AA;
+  --color-primary-subtle: #FFF7ED;
 
   /* Semantic vivid — darker for light bg contrast */
-  --color-success: #16a34a;
-  --color-streak:  #d97706;
-  --color-warning: #ca8a04;
-  --color-error:   #dc2626;
-  --color-xp:      #7c3aed;
-  --color-info:    #0284c7;
+  --color-success: #16A34A;
+  --color-streak:  #D97706;
+  --color-warning: #CA8A04;
+  --color-error:   #DC2626;
+  --color-xp:      #7C3AED;
+  --color-info:    #0284C7;
 
-  /* Semantic muted — flip from dark tints to light tints */
-  --color-success-muted: #dcfce7;
-  --color-streak-muted:  #fef3c7;
-  --color-error-muted:   #fee2e2;
-  --color-xp-muted:      #ede9fe;
-  --color-info-muted:    #e0f2fe;
+  /* Semantic muted — slate-tinted pastels */
+  --color-success-muted: #DCFCE7;
+  --color-streak-muted:  #FEF3C7;
+  --color-error-muted:   #FEE2E2;
+  --color-xp-muted:      #EDE9FE;
+  --color-info-muted:    #E0F2FE;
+
+  /* Cool Slate gray-scale flip
+     text-gray-100 = primary text  (#1E293B slate-800)
+     text-gray-400 = muted text    (#64748B slate-500)
+     text-gray-600 = subtle text   (#CBD5E1 slate-300) */
+  --color-gray-50:  #0F172A;
+  --color-gray-100: #1E293B;
+  --color-gray-200: #334155;
+  --color-gray-300: #475569;
+  --color-gray-400: #64748B;
+  --color-gray-500: #94A3B8;
+  --color-gray-600: #CBD5E1;
+  --color-gray-700: #E2E8F0;
+  --color-gray-800: #F1F5F9;
+  --color-gray-900: #F8FAFC;
+  --color-gray-950: #FFFFFF;
 }
 
 * { box-sizing: border-box; }
@@ -129,11 +145,19 @@ body {
 }
 
 html.light .card {
-  border-color: rgba(0, 0, 0, 0.08);
+  background: #FFFFFF;
+  border-color: #E2E8F0;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.07), 0 1px 2px rgba(15,23,42,0.04);
 }
 html.light .card-elevated {
-  border-color: rgba(0, 0, 0, 0.1);
+  background: #F8FAFC;
+  border-color: #E2E8F0;
 }
 html.light ::-webkit-scrollbar-thumb {
-  background: var(--color-surface-4);
+  background: #CBD5E1;
+}
+
+/* Convert all border-white/* Tailwind utilities to a visible slate border */
+html.light [class*="border-white"] {
+  border-color: #E2E8F0;
 }

@@ -74,11 +74,22 @@ export const GET = withApiHandler(async (req: NextRequest) => {
       byStep[name].hours += session.duration;
     }
 
-    return NextResponse.json(
-      Object.entries(byStep)
-        .sort((a, b) => a[1].sortOrder - b[1].sortOrder)
-        .map(([name, { hours }]) => ({ name, hours: Math.round(hours * 100) / 100 }))
-    );
+    if (Object.keys(byStep).length > 0) {
+      return NextResponse.json(
+        Object.entries(byStep)
+          .sort((a, b) => a[1].sortOrder - b[1].sortOrder)
+          .map(([name, { hours }]) => ({ name, hours: Math.round(hours * 100) / 100 }))
+      );
+    }
+
+    // Fallback: goal-level hours from DailyLog
+    const logs = await prisma.dailyLog.findMany({
+      where: { goalId, date: { gte: from, lte: to }, timeSpent: { gt: 0 } },
+    });
+    const totalHours = logs.reduce((sum, l) => sum + l.timeSpent, 0);
+    if (totalHours === 0) return NextResponse.json([]);
+    const goal = await prisma.goal.findUnique({ where: { id: goalId }, select: { name: true } });
+    return NextResponse.json([{ name: goal?.name ?? "Total", hours: Math.round(totalHours * 100) / 100 }]);
   }
 
   return NextResponse.json([]);
