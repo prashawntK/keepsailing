@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Archive, RotateCcw } from "lucide-react";
+import { Pencil, Archive, RotateCcw, Check } from "lucide-react";
 import { cn, CATEGORY_COLORS, PRIORITY_LABELS, formatHours } from "@/lib/utils";
 import { Modal } from "@/components/ui/Modal";
 import { GoalForm, type GoalFormData } from "./GoalForm";
@@ -86,6 +86,33 @@ export function GoalList({ goals, onRefresh }: GoalListProps) {
                   </>
                 )}
               </div>
+
+              {/* Steps to-do list */}
+              {(goal as GoalWithSteps).steps && (goal as GoalWithSteps).steps!.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {(goal as GoalWithSteps).steps!.map((step) => {
+                    const done = step.completedAt !== null;
+                    return (
+                      <div key={step.id} className="flex items-center gap-1.5">
+                        <div className={cn(
+                          "w-3.5 h-3.5 rounded-full border flex items-center justify-center flex-shrink-0 transition-all",
+                          done
+                            ? "bg-success/20 border-success/50"
+                            : "border-gray-700"
+                        )}>
+                          {done && <Check size={8} className="text-success" />}
+                        </div>
+                        <span className={cn(
+                          "text-xs transition-all",
+                          done ? "line-through text-gray-600" : "text-gray-400"
+                        )}>
+                          {step.name}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-1 flex-shrink-0">
               {!goal.isArchived ? (
