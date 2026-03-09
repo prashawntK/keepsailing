@@ -6,6 +6,7 @@ import { CategoryPieChart } from "@/components/stats/CategoryPieChart";
 import { StreakCalendar } from "@/components/stats/StreakCalendar";
 import { StatsOverviewCards } from "@/components/stats/StatsOverviewCards";
 import { StepBreakdownCard } from "@/components/stats/StepBreakdownCard";
+import { LifeInWeeksCard } from "@/components/stats/LifeInWeeksCard";
 import { getLast365Days } from "@/lib/utils";
 import type { OverviewStats } from "@/types";
 
@@ -25,20 +26,29 @@ export default function StatsPage() {
   const [scoreTrend, setScoreTrend] = useState<{ date: string; score: number }[]>([]);
   const [categoryData, setCategoryData] = useState<{ name: string; value: number }[]>([]);
   const [yearScores, setYearScores] = useState<{ date: string; score: number }[]>([]);
+  const [weeklyScores, setWeeklyScores] = useState<
+    { date: string; goalsCompleted: number; goalsTotal: number }[]
+  >([]);
 
   const fetchData = useCallback(async () => {
-    const [ov, trend, cat, yearData, goals] = await Promise.all([
+    const currentYear = new Date().getFullYear();
+    const yearStart = `${currentYear}-01-01`;
+    const yearEnd   = `${currentYear}-12-31`;
+
+    const [ov, trend, cat, yearData, goals, calYear] = await Promise.all([
       fetch(`/api/stats/overview?period=${period}`).then((r) => r.json()),
       fetch(`/api/stats/charts?type=daily_scores&period=${period}`).then((r) => r.json()),
       fetch(`/api/stats/charts?type=category_breakdown&period=${period}`).then((r) => r.json()),
       fetch(`/api/scores?from=${getLast365Days()[0]}&to=${getLast365Days()[364]}&fill=true`).then((r) => r.json()),
       fetch(`/api/goals`).then((r) => r.json()),
+      fetch(`/api/scores?from=${yearStart}&to=${yearEnd}&fill=true`).then((r) => r.json()),
     ]);
     setOverview(ov);
     setScoreTrend(trend);
     setCategoryData(cat);
     setYearScores(yearData);
     setGoalsWithSteps(goals ?? []);
+    setWeeklyScores(calYear ?? []);
   }, [period]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -98,6 +108,9 @@ export default function StatsPage() {
         </h2>
         <StreakCalendar scores={yearScores} />
       </div>
+
+      {/* Life in weeks */}
+      <LifeInWeeksCard scores={weeklyScores} year={new Date().getFullYear()} />
 
       {/* Step breakdown per goal */}
       {goalsWithSteps.length > 0 && (
