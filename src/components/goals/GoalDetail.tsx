@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Check } from "lucide-react";
 import { format } from "date-fns";
 import { Modal } from "@/components/ui/Modal";
@@ -15,32 +16,45 @@ interface GoalDetailProps {
 export function GoalDetail({ goal, onClose, onRefresh }: GoalDetailProps) {
   if (goal.steps.length === 0) return null;
 
-  async function handleUncomplete(stepId: string) {
-    await fetch("/api/steps/uncomplete", {
+  // Optimistic local state — reflects step changes instantly, server syncs in background
+  const [optimisticSteps, setOptimisticSteps] = useState(goal.steps);
+
+  const completedCount = optimisticSteps.filter((s) => s.completedAt !== null).length;
+  const currentStep = optimisticSteps.find((s) => s.completedAt === null) ?? null;
+
+  function markDone(stepId: string) {
+    setOptimisticSteps((prev) =>
+      prev.map((s) => s.id === stepId ? { ...s, completedAt: new Date().toISOString() } : s)
+    );
+  }
+
+  function markUndone(stepId: string) {
+    setOptimisticSteps((prev) =>
+      prev.map((s) => s.id === stepId ? { ...s, completedAt: null } : s)
+    );
+  }
+
+  function handleCompleteStep(stepId: string) {
+    markDone(stepId); // instant visual cross-off
+    fetch("/api/steps/complete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ stepId }),
-    });
-    onRefresh();
-    onClose();
+    })
+      .then((res) => { if (!res.ok) markUndone(stepId); else onRefresh(); })
+      .catch(() => markUndone(stepId));
   }
 
-  async function handleCompleteStep(stepId: string) {
-    try {
-      const res = await fetch("/api/steps/complete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stepId }),
-      });
-      if (!res.ok) return;
-      onRefresh();
-      onClose();
-    } catch {
-      // silent
-    }
+  function handleUncomplete(stepId: string) {
+    markUndone(stepId); // instant visual un-cross
+    fetch("/api/steps/uncomplete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stepId }),
+    })
+      .then((res) => { if (!res.ok) markDone(stepId); else onRefresh(); })
+      .catch(() => markDone(stepId));
   }
-
-  const completedCount = goal.steps.filter((s) => s.completedAt !== null).length;
 
   return (
     <Modal
@@ -51,23 +65,23 @@ export function GoalDetail({ goal, onClose, onRefresh }: GoalDetailProps) {
       <div className="space-y-4">
         {/* Progress summary */}
         <div className="flex items-center gap-2 text-sm text-gray-400">
-          <span>{completedCount} of {goal.steps.length} steps completed</span>
-          {completedCount === goal.steps.length && (
+          <span>{completedCount} of {optimisticSteps.length} steps completed</span>
+          {completedCount === optimisticSteps.length && (
             <span className="text-xs bg-success/15 text-success px-2 py-0.5 rounded-full">All done!</span>
           )}
         </div>
 
         {/* Steps list */}
         <div className="space-y-1.5">
-          {goal.steps.map((step) => {
-            const isCurrent = goal.currentStep?.id === step.id;
+          {optimisticSteps.map((step) => {
+            const isCurrent = currentStep?.id === step.id;
             const isCompleted = step.completedAt !== null;
 
             return (
               <div
                 key={step.id}
                 className={cn(
-                  "flex items-start gap-3 px-3 py-2.5 rounded-xl transition-all",
+                  "flex items-start gap-3 px-3 py-2.5 rounded-xl transition-all duration-150",
                   isCurrent && "bg-primary/10 border border-primary/25",
                   isCompleted && !isCurrent && "opacity-60",
                   !isCurrent && !isCompleted && "opacity-40 bg-surface-2/30"
@@ -94,7 +108,7 @@ export function GoalDetail({ goal, onClose, onRefresh }: GoalDetailProps) {
 
                 <div className="flex-1 min-w-0">
                   <span className={cn(
-                    "text-sm",
+                    "text-sm transition-all duration-150",
                     isCompleted ? "line-through text-gray-500" : isCurrent ? "text-gray-100" : "text-gray-500"
                   )}>
                     {step.name}

@@ -31,7 +31,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
         update: { completed: remainingCount === 0 },
         create: { goalId, date: logDate, completed: remainingCount === 0, targetAtTime: goal.dailyTarget },
       });
-      await persistDailyScore(logDate);
+      persistDailyScore(logDate).catch(console.error);
       return NextResponse.json(log);
     } else {
       // All steps done — toggling reverts the last completed step
@@ -47,7 +47,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
         update: { completed: false },
         create: { goalId, date: logDate, completed: false, targetAtTime: goal.dailyTarget },
       });
-      await persistDailyScore(logDate);
+      persistDailyScore(logDate).catch(console.error);
       return NextResponse.json(log);
     }
   }

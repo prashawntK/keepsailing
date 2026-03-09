@@ -33,7 +33,8 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     },
   });
 
-  await persistDailyScore(date);
+  // Fire-and-forget — don't block the response on score recalculation
+  persistDailyScore(date).catch(console.error);
 
   return NextResponse.json({ log, remainingSteps: remainingCount });
 });

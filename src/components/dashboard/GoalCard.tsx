@@ -20,6 +20,8 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
   // Optimistic local state — updates instantly, DB syncs in background
   const [optimisticCompleted, setOptimisticCompleted] = useState<boolean | null>(null);
   const [optimisticTime, setOptimisticTime] = useState<number | null>(null);
+  // Track which step ID was just completed — hides it instantly before server confirms
+  const [completedStepId, setCompletedStepId] = useState<string | null>(null);
   const [showManual, setShowManual] = useState(false);
   const [manualMinutes, setManualMinutes] = useState("30");
   const [showDetail, setShowDetail] = useState(false);
@@ -29,6 +31,8 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
   // Use optimistic values if set, otherwise use server values
   const displayCompleted = optimisticCompleted ?? goal.todayLog?.completed ?? false;
   const displayTimeSpent = optimisticTime ?? goal.todayLog?.timeSpent ?? 0;
+  // Hide the current step indicator immediately when its complete button is clicked
+  const displayCurrentStep = completedStepId === goal.currentStep?.id ? null : goal.currentStep;
 
   const rawPct = goal.goalType === "checkbox"
     ? (displayCompleted ? 100 : 0)
@@ -50,55 +54,46 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
     onRefresh();
   }
 
-  async function handleCheckboxToggle() {
+  function handleCheckboxToggle() {
     const hasSteps = goal.steps.length > 0;
 
     if (!hasSteps) {
-      // No steps — simple toggle with optimistic UI
+      // No steps — optimistic toggle, server syncs in background
       const newVal = !displayCompleted;
       setOptimisticCompleted(newVal);
-      try {
-        await fetch("/api/logs/toggle", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ goalId: goal.id }),
-        });
-        onRefresh();
-      } catch {
-        setOptimisticCompleted(!newVal);
-      }
+      fetch("/api/logs/toggle", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ goalId: goal.id }),
+      })
+        .then(() => onRefresh())
+        .catch(() => setOptimisticCompleted(!newVal));
     } else {
-      // Has steps — advancing one step doesn't complete the goal.
-      // Don't set optimistic state; let refresh show correct state.
-      try {
-        await fetch("/api/logs/toggle", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ goalId: goal.id }),
-        });
-        onRefresh();
-      } catch {
-        // nothing to revert
-      }
+      // Has steps — fire-and-forget, refresh brings correct next step
+      fetch("/api/logs/toggle", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ goalId: goal.id }),
+      })
+        .then(() => onRefresh())
+        .catch(() => {});
     }
   }
 
-  async function handleCompleteStep() {
+  function handleCompleteStep() {
     if (!goal.currentStep) return;
-    try {
-      const res = await fetch("/api/steps/complete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stepId: goal.currentStep.id }),
-      });
-      if (!res.ok) {
-        console.error("Failed to complete step:", await res.text());
-        return;
-      }
-      onRefresh();
-    } catch (err) {
-      console.error("Error completing step:", err);
-    }
+    const stepId = goal.currentStep.id;
+    setCompletedStepId(stepId); // instant: hide current step indicator
+    fetch("/api/steps/complete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stepId }),
+    })
+      .then((res) => {
+        if (!res.ok) setCompletedStepId(null); // revert
+        else onRefresh();
+      })
+      .catch(() => setCompletedStepId(null));
   }
 
   async function handleManualAdd() {
@@ -172,10 +167,10 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
           </div>
 
           {/* Current step indicator */}
-          {goal.currentStep && (
+          {displayCurrentStep && (
             <div className="mt-1 flex items-center gap-1">
               <ChevronRight size={12} className="text-gray-600 flex-shrink-0" />
-              <span className="text-sm text-primary-light font-medium truncate">{goal.currentStep.name}</span>
+              <span className="text-sm text-primary-light font-medium truncate">{displayCurrentStep.name}</span>
               {goal.steps.length > 1 && (
                 <span className="text-xs text-gray-500 flex-shrink-0">
                   ({goal.steps.filter((s) => s.completedAt !== null).length + 1}/{goal.steps.length})
@@ -223,7 +218,7 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
             >
               <Plus size={14} />
             </button>
-            {goal.currentStep && (
+            {displayCurrentStep && (
               <button
                 onClick={handleCompleteStep}
                 title="Complete current step"
