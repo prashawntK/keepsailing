@@ -6,7 +6,7 @@ import { Navigation } from "@/components/ui/Navigation";
 import { ServiceWorkerRegistrar } from "@/components/providers/ServiceWorkerRegistrar";
 
 export const viewport: Viewport = {
-  themeColor: "#6366F1",
+  themeColor: "#000000",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,

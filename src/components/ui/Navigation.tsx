@@ -19,20 +19,19 @@ export function Navigation() {
 
   return (
     <>
-      {/* Top bar */}
-      <header className="sticky top-0 z-40 bg-surface-base/80 backdrop-blur-md border-b border-white/[0.06]">
-        <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
-          <span className="text-lg font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
-            ADHD Scorecard
-          </span>
-
-          {timerState.isRunning && (
+      {/* Top bar — visible only when timer is running; always reserves safe-area space */}
+      <header
+        className="sticky top-0 z-40"
+        style={{ paddingTop: "env(safe-area-inset-top)" }}
+      >
+        {timerState.isRunning && (
+          <div className="max-w-4xl mx-auto px-4 h-11 flex items-center justify-end bg-surface-base/80 backdrop-blur-md border-b border-white/[0.06]">
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-success/15 border border-success/30 text-success text-sm font-mono">
               <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
               {displayTime}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </header>
 
       {/* Bottom floating tab bar */}
