@@ -9,19 +9,20 @@ interface StreakCalendarProps {
 
 function getColor(score: number, isLight: boolean): string {
   if (isLight) {
-    if (score === 0) return "#F1F5F9"; // slate-100 — no activity
-    if (score < 30)  return "#DBEAFE"; // blue-100
-    if (score < 50)  return "#FEF3C7"; // amber-100
-    if (score < 70)  return "#FDE68A"; // amber-200
-    if (score < 90)  return "#86EFAC"; // green-300
-    return "#F97316";                   // orange
+    if (score === 0) return "#E2E8F0";           // slate-200  — empty, clearly visible
+    if (score < 30)  return "#FCA5A5";           // red-300    — low activity
+    if (score < 50)  return "#FCD34D";           // amber-300  — partial
+    if (score < 70)  return "#86EFAC";           // green-300  — decent
+    if (score < 85)  return "#4ADE80";           // green-400  — good
+    return "#22C55E";                            // green-500  — excellent
   }
-  if (score === 0) return "#111827";
-  if (score < 30)  return "#1f2937";
-  if (score < 50)  return "#7f1d1d";
-  if (score < 70)  return "#ca8a04";
-  if (score < 85)  return "#16a34a";
-  return "#F97316";
+  // Dark themes — semantic colours using CSS variables where possible
+  if (score === 0) return "rgba(255,255,255,0.09)"; // ghost square — clearly a cell
+  if (score < 30)  return "rgba(239,68,68,0.45)";   // var(--color-error) faint
+  if (score < 50)  return "rgba(245,158,11,0.55)";  // var(--color-streak) medium
+  if (score < 70)  return "rgba(34,197,94,0.55)";   // var(--color-success) medium
+  if (score < 85)  return "#16a34a";                // solid green
+  return "#22C55E";                                  // bright success
 }
 
 export function StreakCalendar({ scores }: StreakCalendarProps) {
@@ -72,16 +73,23 @@ export function StreakCalendar({ scores }: StreakCalendarProps) {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-2 mt-3">
-        <span className="text-xs text-gray-500">Less</span>
-        {[0, 25, 50, 70, 90].map((s) => (
-          <div
-            key={s}
-            className="w-3 h-3 rounded-sm"
-            style={{ backgroundColor: getColor(s, isLight) }}
-          />
+      <div className="flex items-center gap-3 mt-3 flex-wrap">
+        {[
+          { score: 0,  label: "None"  },
+          { score: 20, label: "<30"   },
+          { score: 40, label: "30–50" },
+          { score: 60, label: "50–70" },
+          { score: 75, label: "70–85" },
+          { score: 90, label: "85+"   },
+        ].map(({ score, label }) => (
+          <div key={label} className="flex items-center gap-1">
+            <div
+              className="w-3 h-3 rounded-sm flex-shrink-0"
+              style={{ backgroundColor: getColor(score, isLight) }}
+            />
+            <span className="text-xs text-gray-500">{label}</span>
+          </div>
         ))}
-        <span className="text-xs text-gray-500">More</span>
       </div>
     </div>
   );
