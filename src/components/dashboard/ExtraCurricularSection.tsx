@@ -1,12 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
 import type { ExtraCurricularWithStatus } from "@/types";
 
 interface Props {
   items: ExtraCurricularWithStatus[];
   onRefresh: () => void;
+}
+
+function timeLabel(minutes: number | null): string | null {
+  if (!minutes) return null;
+  if (minutes < 60) return `${minutes} min`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m ? `${h}h ${m}m` : `${h}h`;
 }
 
 function staleBadge(item: ExtraCurricularWithStatus) {
@@ -28,9 +35,6 @@ function staleBadge(item: ExtraCurricularWithStatus) {
 
 export function ExtraCurricularSection({ items, onRefresh }: Props) {
   const [optimistic, setOptimistic] = useState<Record<string, boolean>>({});
-  const [addName, setAddName] = useState("");
-  const [addEmoji, setAddEmoji] = useState("✨");
-  const [adding, setAdding] = useState(false);
 
   // Sort: unchecked first (by staleness desc), checked sink to bottom
   const sorted = [...items].sort((a, b) => {
@@ -57,23 +61,6 @@ export function ExtraCurricularSection({ items, onRefresh }: Props) {
       .catch(() => setOptimistic((prev) => ({ ...prev, [id]: !newVal })));
   }
 
-  async function handleAdd() {
-    if (!addName.trim()) return;
-    setAdding(true);
-    try {
-      await fetch("/api/extra-curriculars", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: addName.trim(), emoji: addEmoji || "✨" }),
-      });
-      setAddName("");
-      setAddEmoji("✨");
-      onRefresh();
-    } finally {
-      setAdding(false);
-    }
-  }
-
   return (
     <div className="space-y-2">
       <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -83,6 +70,7 @@ export function ExtraCurricularSection({ items, onRefresh }: Props) {
       <div className="glass-card divide-y divide-white/[0.06]">
         {sorted.map((item) => {
           const checked = optimistic[item.id] ?? item.completedToday;
+          const time = timeLabel(item.targetMinutes);
           return (
             <div
               key={item.id}
@@ -105,41 +93,20 @@ export function ExtraCurricularSection({ items, onRefresh }: Props) {
               </button>
 
               <span className="text-base">{item.emoji}</span>
-              <span className={`flex-1 text-sm font-medium ${checked ? "line-through text-gray-500" : "text-gray-200"}`}>
-                {item.name}
-              </span>
+
+              <div className="flex-1 min-w-0">
+                <span className={`text-sm font-medium ${checked ? "line-through text-gray-500" : "text-gray-200"}`}>
+                  {item.name}
+                </span>
+                {time && (
+                  <span className="ml-2 text-xs text-gray-600">{time}</span>
+                )}
+              </div>
 
               {staleBadge(item)}
             </div>
           );
         })}
-
-        {/* Quick-add row */}
-        <div className="flex items-center gap-2 px-4 py-3">
-          <input
-            type="text"
-            value={addEmoji}
-            onChange={(e) => setAddEmoji(e.target.value)}
-            className="w-10 text-center bg-transparent border border-white/10 rounded-md text-base py-1 focus:outline-none focus:border-primary"
-            maxLength={2}
-            placeholder="✨"
-          />
-          <input
-            type="text"
-            value={addName}
-            onChange={(e) => setAddName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-            className="flex-1 bg-transparent border border-white/10 rounded-md px-3 py-1 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-primary"
-            placeholder="Add extra-curricular..."
-          />
-          <button
-            onClick={handleAdd}
-            disabled={!addName.trim() || adding}
-            className="p-1.5 rounded-lg bg-primary/20 text-primary hover:bg-primary/30 disabled:opacity-40 transition-all"
-          >
-            <Plus className="w-4 h-4" />
-          </button>
-        </div>
       </div>
     </div>
   );

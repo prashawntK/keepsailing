@@ -7,7 +7,7 @@ import { Modal } from "@/components/ui/Modal";
 import { GoalList } from "@/components/goals/GoalList";
 import { GoalForm, type GoalFormData } from "@/components/goals/GoalForm";
 import { ExtraCurricularList } from "@/components/goals/ExtraCurricularList";
-import { ExtraCurricularForm } from "@/components/goals/ExtraCurricularForm";
+import { ExtraCurricularForm, type ExtraCurricularFormData } from "@/components/goals/ExtraCurricularForm";
 import type { Goal, ExtraCurricular } from "@/types";
 
 type ParentTab = "goals" | "extras";
@@ -49,7 +49,7 @@ export default function GoalsPage() {
     fetchGoals();
   }
 
-  async function handleAddEC(data: { name: string; emoji: string }) {
+  async function handleAddEC(data: ExtraCurricularFormData) {
     await fetch("/api/extra-curriculars", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

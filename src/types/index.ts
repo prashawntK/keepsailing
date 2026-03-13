@@ -74,6 +74,7 @@ export interface ExtraCurricularWithStatus {
   emoji: string;
   sortOrder: number;
   isArchived: boolean;
+  targetMinutes: number | null;
   completedToday: boolean;
   lastPerformedDate: string | null;
   lastPerformedDaysAgo: number | null;

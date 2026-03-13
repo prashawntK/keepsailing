@@ -193,14 +193,15 @@ model EnergyLog {
 }
 
 model ExtraCurricular {
-  id         String    @id @default(cuid())
-  name       String
-  emoji      String    @default("✨")
-  sortOrder  Int       @default(0)
-  isArchived Boolean   @default(false)
-  archivedAt DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id                  String    @id @default(cuid())
+  name                String
+  emoji               String    @default("✨")
+  sortOrder           Int       @default(0)
+  targetMinutes Int?            // recommended session duration in minutes
+  isArchived          Boolean   @default(false)
+  archivedAt          DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   logs ExtraCurricularLog[]
 

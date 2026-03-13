@@ -155,6 +155,7 @@ export async function assembleDashboardData(date?: string): Promise<DashboardDat
       emoji: ec.emoji,
       sortOrder: ec.sortOrder,
       isArchived: ec.isArchived,
+      targetMinutes: ec.targetMinutes ?? null,
       completedToday: ecTodaySet.has(ec.id),
       lastPerformedDate,
       lastPerformedDaysAgo,
