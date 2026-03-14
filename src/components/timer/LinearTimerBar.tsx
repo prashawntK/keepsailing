@@ -1,9 +1,9 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface LinearTimerBarProps {
-  elapsed: number; // seconds
+  elapsed: number;   // seconds
   duration: number | null; // target seconds, null = open-ended
 }
 
@@ -11,38 +11,38 @@ export function LinearTimerBar({ elapsed, duration }: LinearTimerBarProps) {
   const isComplete = duration != null && elapsed >= duration;
   const progress = duration != null ? Math.min(100, (elapsed / duration) * 100) : null;
 
-  // Colour stops: primary while running, success when complete
-  const barColor = isComplete ? "bg-success" : "bg-primary";
-  const glowColor = isComplete
-    ? "0 0 8px 2px rgba(34, 197, 94, 0.4)"
-    : "0 0 8px 2px rgba(99, 102, 241, 0.4)";
+  if (progress != null) {
+    // Timed mode — always animates FROM 0% (initial) to current progress
+    const color = isComplete ? "var(--color-success)" : "var(--color-primary)";
+    const glow = isComplete
+      ? "0 0 8px rgba(34,197,94,0.7)"
+      : "0 0 8px rgba(99,102,241,0.7)";
+    return (
+      <div className="w-full h-[2px] bg-white/[0.07]">
+        <motion.div
+          className="h-full"
+          initial={{ width: "0%" }}
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: 1, ease: "linear" }}
+          style={{ background: color, boxShadow: glow }}
+        />
+      </div>
+    );
+  }
 
+  // Open-ended mode — scanning shimmer left → right, loops
   return (
-    <div className="w-full h-1.5 rounded-full bg-surface-2/60 overflow-hidden">
-      {progress != null ? (
-        /* Timed mode — linear fill */
-        <div
-          className={cn(
-            "h-full rounded-full transition-all duration-1000 ease-linear",
-            barColor
-          )}
-          style={{
-            width: `${progress}%`,
-            boxShadow: glowColor,
-          }}
-        />
-      ) : (
-        /* Open-ended mode — pulsing bar */
-        <div
-          className={cn(
-            "h-full rounded-full bg-primary animate-pulse",
-          )}
-          style={{
-            width: "40%",
-            boxShadow: "0 0 8px 2px rgba(99, 102, 241, 0.4)",
-          }}
-        />
-      )}
+    <div className="relative w-full h-[2px] bg-white/[0.07] overflow-hidden">
+      <div
+        style={{
+          position: "absolute",
+          inset: "0 auto 0 0",
+          width: "45%",
+          background:
+            "linear-gradient(90deg, transparent, var(--color-primary), transparent)",
+          animation: "timer-scan 1.8s cubic-bezier(0.4,0,0.6,1) infinite",
+        }}
+      />
     </div>
   );
 }

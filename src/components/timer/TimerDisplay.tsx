@@ -6,7 +6,6 @@ import { useTimer } from "@/components/providers/TimerProvider";
 import { LinearTimerBar } from "./LinearTimerBar";
 import { formatTimerDisplay } from "@/lib/utils";
 import { useToast } from "@/lib/toast";
-
 import type { GoalWithProgress } from "@/types";
 
 interface TimerDisplayProps {
@@ -19,19 +18,17 @@ export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
   const { success: toastSuccess } = useToast();
   const [toasted, setToasted] = useState(false);
 
-  // Resolve name and emoji — universal fields first, then fallback to goal lookup
   const activeGoal = timerState.isRunning
     ? goals?.find((g) => g.id === timerState.goalId)
     : undefined;
-  const timerName = timerState.targetName ?? activeGoal?.name ?? "Timer";
-  const timerEmoji = timerState.targetEmoji ?? activeGoal?.emoji ?? "\u23F1\uFE0F";
 
-  // Duration info
+  const timerName = timerState.targetName ?? activeGoal?.name ?? "Timer";
+  const timerEmoji = timerState.targetEmoji ?? activeGoal?.emoji ?? "⏱️";
+  const stepLabel = activeGoal?.currentStep ? ` · ${activeGoal.currentStep.name}` : "";
+
   const duration = timerState.targetDuration;
-  const remainingSeconds = duration != null ? Math.max(0, duration - totalElapsed) : null;
   const isComplete = duration != null && totalElapsed >= duration;
 
-  // Fire completion toast once
   if (isComplete && !toasted) {
     setToasted(true);
     toastSuccess("Timer complete!", `${timerEmoji} ${timerName}`);
@@ -45,48 +42,52 @@ export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
     onRefresh();
   }
 
-  // Format "elapsed / total" or "elapsed ✓" when done
-  const timeLabel = (() => {
-    if (duration == null) return null;
-    if (remainingSeconds != null && remainingSeconds > 0) {
-      return `${displayTime} / ${formatTimerDisplay(duration)}`;
-    }
-    return `${displayTime} ✓`;
-  })();
+  // "01:23 / 30:00" when timed, plain "01:23" when open-ended
+  const timeDisplay =
+    duration != null
+      ? `${displayTime} / ${formatTimerDisplay(duration)}`
+      : displayTime;
 
   return (
-    <div className="fixed bottom-20 left-0 right-0 mx-4 z-40 md:bottom-4 md:right-4 md:left-auto md:w-80">
-      <div className="bg-surface-1 border border-primary/30 rounded-2xl shadow-2xl shadow-primary/10 overflow-hidden">
-        <div className="p-3">
-          {/* Name row */}
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-base">{timerEmoji}</span>
-            <p className="text-xs text-primary font-medium truncate flex-1">
-              {timerName}
-              {activeGoal?.currentStep ? ` · ${activeGoal.currentStep.name}` : ""}
-            </p>
-          </div>
+    <div className="fixed bottom-20 left-0 right-0 mx-4 z-40 md:bottom-4 md:right-4 md:left-auto md:w-72">
+      <div
+        className="rounded-2xl overflow-hidden shadow-2xl"
+        style={{
+          background: "var(--color-surface-1)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          borderTop: "1px solid rgba(255,255,255,0.13)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+        }}
+      >
+        {/* Single compact row */}
+        <div className="flex items-center gap-2.5 px-3 py-2.5">
+          <span className="text-sm flex-shrink-0">{timerEmoji}</span>
 
-          {/* Time + stop button */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 min-w-0">
-              <p className="text-2xl font-mono font-bold text-gray-100 tabular-nums">
-                {timeLabel ?? displayTime}
-              </p>
-            </div>
-            <button
-              onClick={handleStop}
-              className="flex-shrink-0 w-10 h-10 rounded-xl bg-error/20 hover:bg-error/30 text-error flex items-center justify-center transition-all"
-            >
-              <Square size={18} fill="currentColor" />
-            </button>
-          </div>
+          <p className="flex-1 min-w-0 text-xs font-medium text-gray-300 truncate">
+            {timerName}
+            {stepLabel && <span className="text-gray-500">{stepLabel}</span>}
+          </p>
 
-          {/* Linear progress bar */}
-          <div className="mt-2">
-            <LinearTimerBar elapsed={totalElapsed} duration={duration} />
-          </div>
+          <span
+            className="text-xs font-mono font-bold tabular-nums flex-shrink-0"
+            style={{ color: isComplete ? "var(--color-success)" : "var(--color-primary)" }}
+          >
+            {timeDisplay}
+          </span>
+
+          <button
+            onClick={handleStop}
+            className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
+            style={{ background: "rgba(239,68,68,0.15)", color: "var(--color-error)" }}
+            onMouseEnter={e => (e.currentTarget.style.background = "rgba(239,68,68,0.28)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "rgba(239,68,68,0.15)")}
+          >
+            <Square size={11} fill="currentColor" />
+          </button>
         </div>
+
+        {/* Progress bar flush at the bottom */}
+        <LinearTimerBar elapsed={totalElapsed} duration={duration} />
       </div>
     </div>
   );
