@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Square } from "lucide-react";
 import { useTimer } from "@/components/providers/TimerProvider";
 import { LinearTimerBar } from "./LinearTimerBar";
@@ -29,10 +29,12 @@ export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
   const duration = timerState.targetDuration;
   const isComplete = duration != null && totalElapsed >= duration;
 
-  if (isComplete && !toasted) {
-    setToasted(true);
-    toastSuccess("Timer complete!", `${timerEmoji} ${timerName}`);
-  }
+  useEffect(() => {
+    if (isComplete && !toasted) {
+      setToasted(true);
+      toastSuccess("Timer complete!", `${timerEmoji} ${timerName}`);
+    }
+  }, [isComplete, toasted, timerEmoji, timerName, toastSuccess]);
 
   if (!timerState.isRunning) return null;
 
