@@ -19,11 +19,12 @@ export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
   const { success: toastSuccess } = useToast();
   const [showRating, setShowRating] = useState(false);
   const [rating, setRating] = useState(0);
-
-  if (!timerState.isRunning) return null;
+  const [toasted, setToasted] = useState(false);
 
   // Resolve name and emoji — universal fields first, then fallback to goal lookup
-  const activeGoal = goals?.find((g) => g.id === timerState.goalId);
+  const activeGoal = timerState.isRunning
+    ? goals?.find((g) => g.id === timerState.goalId)
+    : undefined;
   const timerName =
     timerState.targetName ?? activeGoal?.name ?? "Timer";
   const timerEmoji =
@@ -37,11 +38,12 @@ export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
   const isComplete = duration != null && totalElapsed >= duration;
 
   // Fire completion toast once
-  const [toasted, setToasted] = useState(false);
   if (isComplete && !toasted) {
     setToasted(true);
     toastSuccess("Timer complete!", `${timerEmoji} ${timerName}`);
   }
+
+  if (!timerState.isRunning) return null;
 
   async function handleStop(focusRating?: number) {
     await stopTimer(focusRating);
