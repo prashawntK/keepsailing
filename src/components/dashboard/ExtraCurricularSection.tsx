@@ -98,9 +98,19 @@ export function ExtraCurricularSection({ items, onRefresh }: Props) {
                 <span className={`text-sm font-medium ${checked ? "line-through text-gray-500" : "text-gray-200"}`}>
                   {item.name}
                 </span>
-                {time && (
-                  <span className="ml-2 text-xs text-gray-600">{time}</span>
-                )}
+                <span className="flex items-center gap-1.5 mt-0.5">
+                  {time && (
+                    <span className="text-xs text-gray-600">{time}</span>
+                  )}
+                  {item.totalMinutesSpent > 0 && (
+                    <>
+                      {time && <span className="text-xs text-gray-700">{"\u00B7"}</span>}
+                      <span className="text-xs text-gray-500">
+                        {timeLabel(item.totalMinutesSpent)} spent
+                      </span>
+                    </>
+                  )}
+                </span>
               </div>
 
               {staleBadge(item)}

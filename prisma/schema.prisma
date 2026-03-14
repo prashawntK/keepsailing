@@ -203,7 +203,8 @@ model ExtraCurricular {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
-  logs ExtraCurricularLog[]
+  logs     ExtraCurricularLog[]
+  timeLogs ExtraCurricularTimeLog[]
 
   @@index([isArchived])
 }
@@ -221,6 +222,19 @@ model ExtraCurricularLog {
   @@unique([extraCurricularId, date])
   @@index([date])
   @@index([extraCurricularId])
+}
+
+model ExtraCurricularTimeLog {
+  id                String   @id @default(cuid())
+  extraCurricularId String
+  date              String   // "YYYY-MM-DD"
+  minutesSpent      Int
+  createdAt         DateTime @default(now())
+
+  extraCurricular ExtraCurricular @relation(fields: [extraCurricularId], references: [id], onDelete: Cascade)
+
+  @@index([extraCurricularId])
+  @@index([date])
 }
 
 model Chore {

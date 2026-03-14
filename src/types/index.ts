@@ -13,6 +13,7 @@ export type {
   Step,
   ExtraCurricular,
   ExtraCurricularLog,
+  ExtraCurricularTimeLog,
   Chore,
   ChoreTimeLog,
   ChoreCompletionLog,
@@ -81,6 +82,7 @@ export interface ExtraCurricularWithStatus {
   completedToday: boolean;
   lastPerformedDate: string | null;
   lastPerformedDaysAgo: number | null;
+  totalMinutesSpent: number;
 }
 
 export interface ChoreWithStatus {
@@ -126,6 +128,8 @@ export interface DashboardData {
   date: string;
 }
 
+export type TimerTargetType = "goal" | "ec" | "chore";
+
 export interface TimerState {
   goalId: string | null;
   sessionId: string | null;
@@ -135,6 +139,12 @@ export interface TimerState {
   pomodoroMode: boolean;
   pomodoroPhase: "work" | "break";
   pomodoroCount: number;
+  // Universal timer fields
+  targetType: TimerTargetType | null;
+  targetId: string | null;
+  targetName: string | null;
+  targetEmoji: string | null;
+  targetDuration: number | null; // seconds, null = open-ended count-up
 }
 
 export interface PomodoroSettings {

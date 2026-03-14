@@ -2,9 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { format } from "date-fns";
+import { Timer } from "lucide-react";
 import { DailyScoreCard } from "./DailyScoreCard";
 import { GoalGrid } from "./GoalGrid";
 import { TimerDisplay } from "@/components/timer/TimerDisplay";
+import { TimerStartModal } from "@/components/timer/TimerStartModal";
+import { useTimer } from "@/components/providers/TimerProvider";
 import { MorningView } from "@/components/adhd/MorningView";
 import { ForgivenessBanner } from "@/components/adhd/ForgivenessBanner";
 import { DailyWin } from "@/components/adhd/DailyWin";
@@ -23,6 +26,8 @@ interface DashboardViewProps {
 export function DashboardView({ initialData }: DashboardViewProps) {
   const [data, setData] = useState<DashboardData>(initialData);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [timerModalOpen, setTimerModalOpen] = useState(false);
+  const { timerState } = useTimer();
   const [, startTransition] = useTransition();
   const prevCompletedRef = useRef(initialData.dailyScore.goalsCompleted);
   const refreshingRef = useRef(false);
@@ -96,7 +101,18 @@ export function DashboardView({ initialData }: DashboardViewProps) {
             {format(new Date(), "EEEE, MMMM d")}
           </p>
         </div>
-        <EnergyTracker />
+        <div className="flex items-center gap-2">
+          {!timerState.isRunning && (
+            <button
+              onClick={() => setTimerModalOpen(true)}
+              className="p-2.5 rounded-xl bg-primary/15 text-primary hover:bg-primary/25 transition-all"
+              title="Start timer"
+            >
+              <Timer size={20} />
+            </button>
+          )}
+          <EnergyTracker />
+        </div>
       </div>
 
       {/* Forgiveness banner */}
@@ -148,6 +164,16 @@ export function DashboardView({ initialData }: DashboardViewProps) {
 
       {/* Floating timer */}
       <TimerDisplay onRefresh={refresh} goals={data.goals} />
+
+      {/* Timer start modal */}
+      <TimerStartModal
+        open={timerModalOpen}
+        onClose={() => setTimerModalOpen(false)}
+        goals={data.goals}
+        extraCurriculars={data.extraCurriculars ?? []}
+        chores={data.chores ?? []}
+        onRefresh={refresh}
+      />
     </div>
   );
 }

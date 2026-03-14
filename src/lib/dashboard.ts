@@ -42,6 +42,7 @@ export async function assembleDashboardData(date?: string): Promise<DashboardDat
             orderBy: { date: "desc" },
             take: 1,
           },
+          timeLogs: { select: { minutesSpent: true } },
         },
       }),
       prisma.extraCurricularLog.findMany({
@@ -160,6 +161,11 @@ export async function assembleDashboardData(date?: string): Promise<DashboardDat
       lastPerformedDaysAgo = Math.round(diff / (1000 * 60 * 60 * 24));
     }
 
+    const totalMinutesSpent = (ec.timeLogs ?? []).reduce(
+      (sum: number, l: { minutesSpent: number }) => sum + l.minutesSpent,
+      0
+    );
+
     return {
       id: ec.id,
       name: ec.name,
@@ -170,6 +176,7 @@ export async function assembleDashboardData(date?: string): Promise<DashboardDat
       completedToday: ecTodaySet.has(ec.id),
       lastPerformedDate,
       lastPerformedDaysAgo,
+      totalMinutesSpent,
     };
   });
 
