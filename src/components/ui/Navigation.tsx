@@ -13,9 +13,14 @@ const NAV_ITEMS = [
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
+const AUTH_ROUTES = ["/login", "/signup", "/forgot-password", "/reset-password"];
+
 export function Navigation() {
   const pathname = usePathname();
   const { timerState, displayTime } = useTimer();
+
+  // Don't show navigation on auth pages
+  if (AUTH_ROUTES.some((route) => pathname.startsWith(route))) return null;
 
   return (
     <>
