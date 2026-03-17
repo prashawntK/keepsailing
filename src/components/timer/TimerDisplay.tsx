@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Square } from "lucide-react";
+import { Square, X } from "lucide-react";
 import { useTimer } from "@/components/providers/TimerProvider";
 import { LinearTimerBar } from "./LinearTimerBar";
 import { formatTimerDisplay } from "@/lib/utils";
@@ -14,7 +14,7 @@ interface TimerDisplayProps {
 }
 
 export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
-  const { timerState, displayTime, totalElapsed, stopTimer } = useTimer();
+  const { timerState, displayTime, totalElapsed, stopTimer, cancelTimer } = useTimer();
   const { success: toastSuccess } = useToast();
   const [toasted, setToasted] = useState(false);
 
@@ -40,6 +40,12 @@ export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
 
   function handleStop() {
     stopTimer();
+    setToasted(false);
+    onRefresh();
+  }
+
+  function handleCancel() {
+    cancelTimer();
     setToasted(false);
     onRefresh();
   }
@@ -77,8 +83,28 @@ export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
             {timeDisplay}
           </span>
 
+          {/* Cancel — discards session, no time saved */}
+          <button
+            onClick={handleCancel}
+            title="Cancel timer (discard)"
+            className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
+            style={{ background: "rgba(255,255,255,0.05)", color: "var(--color-text-muted)" }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = "rgba(239,68,68,0.15)";
+              e.currentTarget.style.color = "var(--color-error)";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = "rgba(255,255,255,0.05)";
+              e.currentTarget.style.color = "var(--color-text-muted)";
+            }}
+          >
+            <X size={12} />
+          </button>
+
+          {/* Stop — saves elapsed time to DailyLog */}
           <button
             onClick={handleStop}
+            title="Stop timer (save time)"
             className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
             style={{ background: "rgba(239,68,68,0.15)", color: "var(--color-error)" }}
             onMouseEnter={e => (e.currentTarget.style.background = "rgba(239,68,68,0.28)")}

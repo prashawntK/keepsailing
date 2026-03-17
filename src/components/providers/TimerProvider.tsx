@@ -28,6 +28,7 @@ interface TimerContextValue {
   startTimer: (goalId: string, pomodoro?: boolean) => void;
   startUniversalTimer: (params: StartUniversalTimerParams) => void;
   stopTimer: () => void;
+  cancelTimer: () => void;
   togglePomodoro: () => void;
 }
 
@@ -54,6 +55,7 @@ const TimerContext = createContext<TimerContextValue>({
   startTimer: () => {},
   startUniversalTimer: () => {},
   stopTimer: () => {},
+  cancelTimer: () => {},
   togglePomodoro: () => {},
 });
 
@@ -254,7 +256,7 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Stop timer — clears UI instantly, fires API in background
+  // Stop timer — clears UI instantly, fires API in background (saves time)
   const stopTimer = useCallback(() => {
     const snap = stateRef.current;
     if (!snap.isRunning) return;
@@ -267,6 +269,30 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
 
     // Fire API in background
     fireStopApi(snap);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Cancel timer — clears UI instantly, discards session without saving any time
+  const cancelTimer = useCallback(() => {
+    const snap = stateRef.current;
+    if (!snap.isRunning) return;
+
+    // Clear UI immediately
+    clearTimerInterval();
+    setState(defaultState);
+    stateRef.current = defaultState;
+    localStorage.removeItem(STORAGE_KEY);
+
+    // For goal timers: delete the TimerSession from the DB (no time logged)
+    // For EC/chore timers: nothing to clean up server-side
+    const type = snap.targetType ?? (snap.goalId ? "goal" : null);
+    if (type === "goal" && snap.sessionId) {
+      fetch("/api/timer/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: snap.sessionId }),
+      }).catch(() => {});
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -287,6 +313,7 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
         startTimer,
         startUniversalTimer,
         stopTimer,
+        cancelTimer,
         togglePomodoro,
       }}
     >
