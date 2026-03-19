@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Square, X } from "lucide-react";
+import { Square, X, ChevronDown } from "lucide-react";
 import { useTimer } from "@/components/providers/TimerProvider";
-import { LinearTimerBar } from "./LinearTimerBar";
 import { formatTimerDisplay } from "@/lib/utils";
 import { useToast } from "@/lib/toast";
 import type { GoalWithProgress } from "@/types";
@@ -17,6 +16,7 @@ export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
   const { timerState, displayTime, totalElapsed, stopTimer, cancelTimer } = useTimer();
   const { success: toastSuccess } = useToast();
   const [toasted, setToasted] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   const activeGoal = timerState.isRunning
     ? goals?.find((g) => g.id === timerState.goalId)
@@ -24,10 +24,12 @@ export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
 
   const timerName = timerState.targetName ?? activeGoal?.name ?? "Timer";
   const timerEmoji = timerState.targetEmoji ?? activeGoal?.emoji ?? "⏱️";
-  const stepLabel = activeGoal?.currentStep ? ` · ${activeGoal.currentStep.name}` : "";
+  const stepLabel = activeGoal?.currentStep?.name ?? null;
 
   const duration = timerState.targetDuration;
   const isComplete = duration != null && totalElapsed >= duration;
+  const pct = duration ? Math.min((totalElapsed / duration) * 100, 100) : 0;
+  const color = isComplete ? "#22C55E" : pct > 80 ? "#34D399" : pct > 50 ? "#F59E0B" : "var(--color-primary)";
 
   useEffect(() => {
     if (isComplete && !toasted) {
@@ -41,81 +43,96 @@ export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
   function handleStop() {
     stopTimer();
     setToasted(false);
+    setExpanded(false);
     onRefresh();
   }
 
   function handleCancel() {
     cancelTimer();
     setToasted(false);
+    setExpanded(false);
     onRefresh();
   }
 
-  // "01:23 / 30:00" when timed, plain "01:23" when open-ended
-  const timeDisplay =
-    duration != null
-      ? `${displayTime} / ${formatTimerDisplay(duration)}`
-      : displayTime;
-
   return (
-    <div className="fixed bottom-20 left-0 right-0 mx-4 z-40 md:bottom-4 md:right-4 md:left-auto md:w-72">
+    <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 md:bottom-6">
       <div
-        className="rounded-2xl overflow-hidden shadow-2xl"
+        onClick={() => setExpanded(s => !s)}
+        className="cursor-pointer overflow-hidden transition-all duration-300"
         style={{
-          background: "var(--color-surface-1)",
-          border: "1px solid rgba(255,255,255,0.07)",
-          borderTop: "1px solid rgba(255,255,255,0.13)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+          background: "#0a0a0a",
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: expanded ? "20px" : "999px",
+          boxShadow: `0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(255,255,255,0.04)`,
+          minWidth: expanded ? "220px" : undefined,
         }}
       >
-        {/* Single compact row */}
-        <div className="flex items-center gap-2.5 px-3 py-2.5">
-          <span className="text-sm flex-shrink-0">{timerEmoji}</span>
-
-          <p className="flex-1 min-w-0 text-xs font-medium text-gray-300 truncate">
-            {timerName}
-            {stepLabel && <span className="text-gray-500">{stepLabel}</span>}
-          </p>
-
-          <span
-            className="text-xs font-mono font-bold tabular-nums flex-shrink-0"
-            style={{ color: isComplete ? "var(--color-success)" : "var(--color-primary)" }}
-          >
-            {timeDisplay}
+        {/* Collapsed pill */}
+        <div className="flex items-center gap-2.5 px-4 py-2">
+          {/* Pulsing live dot */}
+          <span className="relative flex-shrink-0">
+            <span className="absolute inline-flex h-2 w-2 rounded-full opacity-75 animate-ping" style={{ background: color }} />
+            <span className="relative inline-flex h-2 w-2 rounded-full" style={{ background: color }} />
           </span>
 
-          {/* Cancel — discards session, no time saved */}
-          <button
-            onClick={handleCancel}
-            title="Cancel timer (discard)"
-            className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
-            style={{ background: "rgba(255,255,255,0.05)", color: "var(--color-text-muted)" }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = "rgba(239,68,68,0.15)";
-              e.currentTarget.style.color = "var(--color-error)";
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-              e.currentTarget.style.color = "var(--color-text-muted)";
-            }}
-          >
-            <X size={12} />
-          </button>
+          <span className="text-sm flex-shrink-0">{timerEmoji}</span>
 
-          {/* Stop — saves elapsed time to DailyLog */}
-          <button
-            onClick={handleStop}
-            title="Stop timer (save time)"
-            className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
-            style={{ background: "rgba(239,68,68,0.15)", color: "var(--color-error)" }}
-            onMouseEnter={e => (e.currentTarget.style.background = "rgba(239,68,68,0.28)")}
-            onMouseLeave={e => (e.currentTarget.style.background = "rgba(239,68,68,0.15)")}
-          >
-            <Square size={11} fill="currentColor" />
-          </button>
+          <span className="text-xs font-mono font-bold tabular-nums flex-shrink-0" style={{ color }}>
+            {displayTime}
+            {duration && !expanded && (
+              <span className="text-gray-600 font-normal"> / {formatTimerDisplay(duration)}</span>
+            )}
+          </span>
+
+          {!expanded && (
+            <span className="text-xs text-gray-500 max-w-[80px] truncate hidden sm:block">
+              {timerName}
+            </span>
+          )}
+
+          <ChevronDown
+            size={12}
+            className="text-gray-600 flex-shrink-0 transition-transform duration-300"
+            style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)" }}
+          />
         </div>
 
-        {/* Progress bar flush at the bottom */}
-        <LinearTimerBar elapsed={totalElapsed} duration={duration} />
+        {/* Expanded panel */}
+        {expanded && (
+          <div
+            className="px-4 pb-3 border-t border-white/[0.05]"
+            onClick={e => e.stopPropagation()}
+          >
+            <p className="text-sm font-semibold text-white mt-2.5 truncate">{timerName}</p>
+            {stepLabel && (
+              <p className="text-[11px] text-gray-500 mt-0.5 truncate">{stepLabel}</p>
+            )}
+
+            {duration && (
+              <div className="mt-2.5 h-1 rounded-full bg-white/[0.06] overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-700"
+                  style={{ width: `${pct}%`, background: color }}
+                />
+              </div>
+            )}
+
+            <div className="flex gap-2 mt-3">
+              <button
+                onClick={handleCancel}
+                className="flex-1 py-1.5 rounded-xl text-xs text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all border border-white/[0.06] flex items-center justify-center gap-1"
+              >
+                <X size={10} /> Discard
+              </button>
+              <button
+                onClick={handleStop}
+                className="flex-1 py-1.5 rounded-xl text-xs bg-red-500/15 text-red-400 hover:bg-red-500/25 transition-all flex items-center justify-center gap-1"
+              >
+                <Square size={9} fill="currentColor" /> Stop & Save
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
