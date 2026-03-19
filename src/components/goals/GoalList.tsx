@@ -73,88 +73,104 @@ export function GoalList({ goals, onRefresh }: GoalListProps) {
   return (
     <>
       <div className="space-y-2">
-        {goals.map((goal) => {
-          const steps = (goal as GoalWithSteps).steps ?? [];
-          const doneCount = steps.filter((s) => s.completedAt !== null).length;
-          const isExpanded = expandedGoals.has(goal.id);
-
-          return (
-            <div
-              key={goal.id}
-              className={cn(
-                "glass-card px-3 py-2.5 flex flex-col gap-1.5",
-                goal.isArchived && "opacity-50"
-              )}
-            >
-              {/* Top row: emoji + name + category + actions */}
-              <div className="flex items-center gap-2">
-                <span className="text-lg flex-shrink-0">{goal.emoji}</span>
-                <p className="font-medium text-primary text-sm flex-1 min-w-0 truncate">{goal.name}</p>
-                <span className={cn("text-xs px-1.5 py-0.5 rounded-full bg-surface-2 flex-shrink-0", CATEGORY_COLORS[goal.category] ?? "text-secondary")}>
+        {goals.map((goal) => (
+          <div
+            key={goal.id}
+            className={cn(
+              "flex items-center gap-3 glass-card px-4 py-3",
+              goal.isArchived && "opacity-50"
+            )}
+          >
+            <span className="text-2xl">{goal.emoji}</span>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-gray-100 truncate">{goal.name}</p>
+              <div className="flex items-center gap-2 mt-0.5 text-xs">
+                <span className={CATEGORY_COLORS[goal.category] ?? "text-gray-400"}>
                   {goal.category}
                 </span>
-                <div className="flex items-center gap-0.5 flex-shrink-0">
-                  {!goal.isArchived ? (
-                    <>
-                      <button onClick={() => handleEditClick(goal)} className="p-1.5 rounded-lg text-secondary hover:text-primary hover:bg-surface-2 cursor-pointer transition-colors">
-                        <Pencil size={13} />
-                      </button>
-                      <button onClick={() => handleArchive(goal)} className="p-1.5 rounded-lg text-secondary hover:text-streak hover:bg-surface-2 cursor-pointer transition-colors">
-                        <Archive size={13} />
-                      </button>
-                    </>
-                  ) : (
-                    <button onClick={() => handleRestore(goal)} className="p-1.5 rounded-lg text-secondary hover:text-success hover:bg-surface-2 cursor-pointer transition-colors">
-                      <RotateCcw size={13} />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Meta row: priority · target */}
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs text-secondary">{PRIORITY_LABELS[goal.priority]}</span>
+                <span className="text-gray-600">·</span>
+                <span className="text-gray-500">{PRIORITY_LABELS[goal.priority]}</span>
                 {goal.goalType === "timer" && goal.dailyTarget > 0 && (
-                  <span className="text-xs text-secondary ml-auto">{formatHours(goal.dailyTarget)}/day</span>
+                  <>
+                    <span className="text-gray-600">·</span>
+                    <span className="text-gray-500">{formatHours(goal.dailyTarget)}/day</span>
+                  </>
                 )}
               </div>
 
-              {/* Steps */}
-              {steps.length > 0 && (
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => toggleExpand(goal.id)}
-                    className="flex items-center gap-1 text-xs text-secondary hover:text-primary transition-colors cursor-pointer"
-                  >
-                    {isExpanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
-                    <span>{doneCount}/{steps.length} steps</span>
-                  </button>
-                  {isExpanded && (
-                    <div className="mt-1 space-y-1 pl-1">
-                      {steps.map((step) => {
-                        const done = step.completedAt !== null;
-                        return (
-                          <div key={step.id} className="flex items-center gap-1.5">
-                            <div className={cn(
-                              "w-3 h-3 rounded-full border flex items-center justify-center flex-shrink-0",
-                              done ? "bg-success/20 border-success/50" : "border-surface-3"
-                            )}>
-                              {done && <Check size={7} className="text-success" />}
+              {/* Steps collapse/expand toggle */}
+              {(goal as GoalWithSteps).steps && (goal as GoalWithSteps).steps!.length > 0 && (() => {
+                const steps = (goal as GoalWithSteps).steps!;
+                const doneCount = steps.filter((s) => s.completedAt !== null).length;
+                const isExpanded = expandedGoals.has(goal.id);
+                return (
+                  <div className="mt-1.5">
+                    <button
+                      type="button"
+                      onClick={() => toggleExpand(goal.id)}
+                      className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                    >
+                      {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                      <span>
+                        {doneCount}/{steps.length} steps
+                      </span>
+                    </button>
+                    {isExpanded && (
+                      <div className="mt-1.5 space-y-1 pl-0.5">
+                        {steps.map((step) => {
+                          const done = step.completedAt !== null;
+                          return (
+                            <div key={step.id} className="flex items-center gap-1.5">
+                              <div className={cn(
+                                "w-3.5 h-3.5 rounded-full border flex items-center justify-center flex-shrink-0 transition-all",
+                                done
+                                  ? "bg-success/20 border-success/50"
+                                  : "border-gray-700"
+                              )}>
+                                {done && <Check size={8} className="text-success" />}
+                              </div>
+                              <span className={cn(
+                                "text-xs transition-all",
+                                done ? "line-through text-gray-600" : "text-gray-400"
+                              )}>
+                                {step.name}
+                              </span>
                             </div>
-                            <span className={cn("text-xs", done ? "line-through text-secondary/50" : "text-secondary")}>
-                              {step.name}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+            <div className="flex items-center gap-1 flex-shrink-0">
+              {!goal.isArchived ? (
+                <>
+                  <button
+                    onClick={() => handleEditClick(goal)}
+                    className="p-2 rounded-lg text-gray-500 hover:text-gray-200 hover:bg-surface-2 cursor-pointer"
+                  >
+                    <Pencil size={14} />
+                  </button>
+                  <button
+                    onClick={() => handleArchive(goal)}
+                    className="p-2 rounded-lg text-gray-500 hover:text-streak hover:bg-surface-2 cursor-pointer"
+                  >
+                    <Archive size={14} />
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => handleRestore(goal)}
+                  className="p-2 rounded-lg text-gray-500 hover:text-success hover:bg-surface-2 cursor-pointer"
+                >
+                  <RotateCcw size={14} />
+                </button>
               )}
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
 
       <Modal
