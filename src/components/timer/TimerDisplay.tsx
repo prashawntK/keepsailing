@@ -20,7 +20,7 @@ export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
   const isLight = theme === "lucid-light";
   const [toasted, setToasted] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const leaveTimer = useRef<ReturnType<typeof setTimeout>>();
+  const leaveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   function onEnter() {
     clearTimeout(leaveTimer.current);
