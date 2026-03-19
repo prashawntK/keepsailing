@@ -31,6 +31,10 @@ export function withApiHandler(handler: RouteHandler): RouteHandler {
  * but API routes should also call this and return 401 if null (Task 5).
  */
 export async function getAuthUserId(): Promise<string | null> {
+  // Dev bypass — returns the hardcoded local user so API routes work without a session
+  if (process.env.NEXT_PUBLIC_DEV_BYPASS_AUTH === "true" && process.env.DEV_USER_ID) {
+    return process.env.DEV_USER_ID;
+  }
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   return user?.id ?? null;
