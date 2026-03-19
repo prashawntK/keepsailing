@@ -115,25 +115,30 @@ export default function StatsPage() {
       </div>
 
       {/* Activity heatmap + Life in weeks — side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
         {/* Activity Heatmap */}
-        <div className="glass-card p-4 group">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider group-hover:text-primary transition-colors">
-              Activity Heatmap — {currentYear}
-            </h2>
+        <div className="glass-card p-4 group flex flex-col">
+          <div className="flex items-start justify-between mb-3">
+            <div>
+              <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider group-hover:text-primary transition-colors">
+                Activity Heatmap — {currentYear}
+              </h2>
+              <p className="text-xs text-gray-500 mt-0.5">Daily score intensity</p>
+            </div>
             <button
               onClick={() => setHeatmapExpanded(true)}
-              className="p-1.5 rounded-lg text-secondary hover:text-primary hover:bg-surface-2 cursor-pointer transition-colors"
+              className="p-1.5 rounded-lg text-secondary hover:text-primary hover:bg-surface-2 cursor-pointer transition-colors flex-shrink-0"
             >
               <Maximize2 size={14} />
             </button>
           </div>
-          <StreakCalendar scores={calendarScores} year={currentYear} />
+          <div className="overflow-x-auto flex-1">
+            <StreakCalendar scores={calendarScores} year={currentYear} />
+          </div>
         </div>
 
         {/* Life in weeks */}
-        <LifeInWeeksCard scores={calendarScores} year={currentYear} />
+        <LifeInWeeksCard scores={calendarScores} year={currentYear} className="h-full" />
       </div>
 
       {/* Heatmap expanded modal */}

@@ -15,6 +15,7 @@ interface DayScore {
 interface LifeInWeeksCardProps {
   scores: DayScore[];
   year: number;
+  className?: string;
 }
 
 type WeekStatus = "green" | "red" | "amber" | "future";
@@ -219,7 +220,7 @@ function Legend() {
 
 // ─── main card ───────────────────────────────────────────────────────────────
 
-export function LifeInWeeksCard({ scores, year }: LifeInWeeksCardProps) {
+export function LifeInWeeksCard({ scores, year, className }: LifeInWeeksCardProps) {
   const [expanded, setExpanded] = useState(false);
   const today = format(new Date(), "yyyy-MM-dd");
   const quarters = getQuartersWithWeeks(year);
@@ -233,7 +234,7 @@ export function LifeInWeeksCard({ scores, year }: LifeInWeeksCardProps) {
 
   return (
     <>
-      <div className="glass-card p-4 group">
+      <div className={cn("glass-card p-4 group flex flex-col", className)}>
         {/* Header */}
         <div className="flex items-start justify-between mb-3">
           <div>
