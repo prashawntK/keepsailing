@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Crown, Download, Loader2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -10,13 +10,27 @@ import type { AppSettings } from "@/types";
 
 type SettingsWithPlan = AppSettings & { plan: string; email?: string; name?: string };
 
+// Isolated component so useSearchParams() is inside a Suspense boundary
+function UpgradedToast() {
+  const searchParams = useSearchParams();
+  const { success: showSuccess } = useToast();
+  const upgradedHandled = useRef(false);
+
+  useEffect(() => {
+    if (searchParams.get("upgraded") === "true" && !upgradedHandled.current) {
+      upgradedHandled.current = true;
+      showSuccess("🎉 Welcome to Pro!", "All features are now unlocked.");
+    }
+  }, [searchParams, showSuccess]);
+
+  return null;
+}
+
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
-  const { success: showSuccess, error: showError } = useToast();
-  const searchParams = useSearchParams();
+  const { error: showError } = useToast();
   const [settings, setSettings] = useState<SettingsWithPlan | null>(null);
   const [billingLoading, setBillingLoading] = useState(false);
-  const upgradedHandled = useRef(false);
 
   const fetchSettings = useCallback(async () => {
     const res = await fetch("/api/settings");
@@ -24,14 +38,6 @@ export default function SettingsPage() {
   }, []);
 
   useEffect(() => { fetchSettings(); }, [fetchSettings]);
-
-  // Show success toast when returning from Stripe checkout
-  useEffect(() => {
-    if (searchParams.get("upgraded") === "true" && !upgradedHandled.current) {
-      upgradedHandled.current = true;
-      showSuccess("🎉 Welcome to Pro!", "All features are now unlocked.");
-    }
-  }, [searchParams, showSuccess]);
 
   async function patchSettings(patch: Partial<AppSettings>) {
     const res = await fetch("/api/settings", {
@@ -89,6 +95,9 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
+      <Suspense fallback={null}>
+        <UpgradedToast />
+      </Suspense>
       <div>
         <h1 className="text-2xl font-bold text-gray-100">Settings</h1>
         <p className="text-sm text-gray-400">Customise your scorecard</p>
