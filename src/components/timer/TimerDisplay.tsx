@@ -5,6 +5,7 @@ import { Square, X, ChevronDown } from "lucide-react";
 import { useTimer } from "@/components/providers/TimerProvider";
 import { formatTimerDisplay } from "@/lib/utils";
 import { useToast } from "@/lib/toast";
+import { useTheme } from "@/components/providers/ThemeProvider";
 import type { GoalWithProgress } from "@/types";
 
 interface TimerDisplayProps {
@@ -15,6 +16,8 @@ interface TimerDisplayProps {
 export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
   const { timerState, displayTime, totalElapsed, stopTimer, cancelTimer } = useTimer();
   const { success: toastSuccess } = useToast();
+  const { theme } = useTheme();
+  const isLight = theme === "lucid-light";
   const [toasted, setToasted] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
@@ -60,10 +63,14 @@ export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
         onClick={() => setExpanded(s => !s)}
         className="cursor-pointer overflow-hidden transition-all duration-300"
         style={{
-          background: "#0a0a0a",
-          border: "1px solid rgba(255,255,255,0.08)",
+          background: isLight ? "rgba(255,255,255,0.85)" : "#0a0a0a",
+          border: isLight ? "1px solid rgba(0,0,0,0.08)" : "1px solid rgba(255,255,255,0.08)",
           borderRadius: expanded ? "20px" : "999px",
-          boxShadow: `0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(255,255,255,0.04)`,
+          boxShadow: isLight
+            ? `0 4px 20px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.9)`
+            : `0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08)`,
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
           minWidth: expanded ? "220px" : undefined,
         }}
       >
@@ -85,14 +92,14 @@ export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
           </span>
 
           {!expanded && (
-            <span className="text-xs text-gray-500 max-w-[80px] truncate hidden sm:block">
+            <span className={`text-xs max-w-[80px] truncate hidden sm:block ${isLight ? "text-gray-500" : "text-gray-500"}`}>
               {timerName}
             </span>
           )}
 
           <ChevronDown
             size={12}
-            className="text-gray-600 flex-shrink-0 transition-transform duration-300"
+            className={`flex-shrink-0 transition-transform duration-300 ${isLight ? "text-gray-400" : "text-gray-600"}`}
             style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)" }}
           />
         </div>
@@ -100,10 +107,10 @@ export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
         {/* Expanded panel */}
         {expanded && (
           <div
-            className="px-4 pb-3 border-t border-white/[0.05]"
+            className={`px-4 pb-3 border-t ${isLight ? "border-black/[0.06]" : "border-white/[0.05]"}`}
             onClick={e => e.stopPropagation()}
           >
-            <p className="text-sm font-semibold text-white mt-2.5 truncate">{timerName}</p>
+            <p className={`text-sm font-semibold mt-2.5 truncate ${isLight ? "text-gray-800" : "text-white"}`}>{timerName}</p>
             {stepLabel && (
               <p className="text-[11px] text-gray-500 mt-0.5 truncate">{stepLabel}</p>
             )}
@@ -120,7 +127,7 @@ export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
             <div className="flex gap-2 mt-3">
               <button
                 onClick={handleCancel}
-                className="flex-1 py-1.5 rounded-xl text-xs text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all border border-white/[0.06] flex items-center justify-center gap-1"
+                className={`flex-1 py-1.5 rounded-xl text-xs hover:text-red-400 hover:bg-red-500/10 transition-all flex items-center justify-center gap-1 border ${isLight ? "border-black/10 text-gray-500" : "border-white/[0.06] text-gray-400"}`}
               >
                 <X size={10} /> Discard
               </button>
