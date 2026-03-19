@@ -86,7 +86,7 @@ export function GoalForm({ initial, onSubmit, onCancel, submitLabel = "Save Goal
     }
   }
 
-  const field = "bg-white/5 backdrop-blur-md border border-white/10 rounded-xl px-3 py-2 text-sm text-gray-100 w-full focus:outline-none focus:border-primary focus:bg-white/10 transition-colors shadow-inner drop-shadow-sm";
+  const field = "bg-surface-2 border border-surface-3 rounded-xl px-3 py-2 text-sm text-primary w-full focus:outline-none focus:border-primary focus:bg-surface-2 transition-colors shadow-inner";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -120,7 +120,7 @@ export function GoalForm({ initial, onSubmit, onCancel, submitLabel = "Save Goal
                 "px-3 py-1 rounded-full text-xs font-medium border transition-all",
                 form.category === c
                   ? "border-primary bg-primary/15 text-primary-light"
-                  : "border-white/[0.08] text-gray-400 hover:border-white/[0.15]"
+                  : "border-surface-3 text-secondary hover:border-primary/40"
               )}
             >
               {c}
@@ -142,7 +142,7 @@ export function GoalForm({ initial, onSubmit, onCancel, submitLabel = "Save Goal
                 "flex-1 py-2 rounded-xl border text-sm font-medium transition-all",
                 form.goalType === t
                   ? "border-primary bg-primary/15 text-primary-light"
-                  : "border-white/[0.08] text-gray-400 hover:border-white/[0.15]"
+                  : "border-surface-3 text-secondary hover:border-primary/40"
               )}
             >
               {t === "timer" ? "⏱ Timer" : "✅ Checkbox"}
@@ -181,8 +181,8 @@ export function GoalForm({ initial, onSubmit, onCancel, submitLabel = "Save Goal
               className={cn(
                 "flex-1 py-2 rounded-xl border text-xs font-medium transition-all",
                 form.priority === value
-                  ? color + " bg-white/5"
-                  : "border-white/[0.08] text-gray-400 hover:border-white/[0.15]"
+                  ? color + " bg-surface-2"
+                  : "border-surface-3 text-secondary hover:border-primary/40"
               )}
             >
               {label}
