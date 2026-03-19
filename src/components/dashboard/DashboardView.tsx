@@ -25,6 +25,8 @@ interface DashboardViewProps {
 
 export function DashboardView({ initialData }: DashboardViewProps) {
   const [data, setData] = useState<DashboardData>(initialData);
+  // loading=true until the first client-side fetch completes
+  const [loading, setLoading] = useState(initialData.date === "");
   const [showConfetti, setShowConfetti] = useState(false);
   const [timerModalOpen, setTimerModalOpen] = useState(false);
   const { timerState } = useTimer();
@@ -33,18 +35,18 @@ export function DashboardView({ initialData }: DashboardViewProps) {
   const refreshingRef = useRef(false);
   const lastDateRef = useRef(format(new Date(), "yyyy-MM-dd"));
 
-  // Silent background refresh — always uses the client's local date, not the server's UTC date
+  // Always fetch with the client's local date — never trust server-UTC date
   const refresh = useCallback(async () => {
-    if (refreshingRef.current) return; // debounce concurrent refreshes
+    if (refreshingRef.current) return;
     refreshingRef.current = true;
     try {
-      const localDate = format(new Date(), "yyyy-MM-dd"); // client-side local timezone
+      const localDate = format(new Date(), "yyyy-MM-dd");
       const res = await fetch(`/api/dashboard?date=${localDate}`, { cache: "no-store" });
       if (!res.ok) return;
       const next: DashboardData = await res.json();
-      // useTransition marks this as low-priority — won't block user interactions
       startTransition(() => {
         setData(next);
+        setLoading(false);
         if (next.dailyScore.goalsCompleted > prevCompletedRef.current) {
           setShowConfetti(true);
           setTimeout(() => setShowConfetti(false), 200);
@@ -52,13 +54,13 @@ export function DashboardView({ initialData }: DashboardViewProps) {
         prevCompletedRef.current = next.dailyScore.goalsCompleted;
       });
     } catch {
-      // silently ignore
+      setLoading(false);
     } finally {
       refreshingRef.current = false;
     }
   }, []);
 
-  // Override any incorrect SSR data (server renders in UTC) with the correct local-date data
+  // Initial load — fetch with correct local date on mount
   useEffect(() => { refresh(); }, [refresh]);
 
   // Request notification permission on mount (non-intrusive) and check chore deadlines
@@ -88,6 +90,17 @@ export function DashboardView({ initialData }: DashboardViewProps) {
 
   const hasActivityToday =
     data.dailyScore.totalHours > 0 || data.dailyScore.goalsCompleted > 0;
+
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="h-8 w-32 bg-surface-2 rounded-lg" />
+        <div className="card h-48 bg-surface-2" />
+        <div className="card h-32 bg-surface-2" />
+        <div className="card h-32 bg-surface-2" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

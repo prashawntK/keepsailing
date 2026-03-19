@@ -1,7 +1,11 @@
 import { DashboardView } from "@/components/dashboard/DashboardView";
-import { assembleDashboardData } from "@/lib/dashboard";
 import type { DashboardData } from "@/types";
 
+// Don't fetch data server-side: the server runs UTC, but users are in their
+// local timezone. If we SSR with a UTC date we'd show yesterday's data to
+// anyone in UTC+1 or later until midnight UTC passes. Instead, render the
+// shell immediately and let DashboardView's first useEffect fetch with the
+// correct client-local date — zero flicker, always correct.
 const EMPTY_STATE: DashboardData = {
   goals: [],
   extraCurriculars: [],
@@ -10,15 +14,9 @@ const EMPTY_STATE: DashboardData = {
   overallStreak: { currentStreak: 0, longestStreak: 0 },
   yesterdayScore: null,
   totalPoints: 0,
-  date: new Date().toISOString().slice(0, 10),
+  date: "",
 };
 
-export default async function Home() {
-  let data: DashboardData;
-  try {
-    data = await assembleDashboardData();
-  } catch {
-    data = EMPTY_STATE;
-  }
-  return <DashboardView initialData={data} />;
+export default function Home() {
+  return <DashboardView initialData={EMPTY_STATE} />;
 }
