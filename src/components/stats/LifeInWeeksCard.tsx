@@ -157,14 +157,14 @@ interface WeekGridProps {
 
 function WeekGrid({ quarters, scores, today, boxSize }: WeekGridProps) {
 
-  const sizeClass = boxSize === "sm" ? "w-4 h-4" : "w-6 h-6";
-  const gapClass  = boxSize === "sm" ? "gap-1" : "gap-1.5";
+  const sizeClass = boxSize === "sm" ? "w-6 h-6" : "w-8 h-8";
+  const gapClass  = boxSize === "sm" ? "gap-1.5" : "gap-2";
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {quarters.map(({ label, weeks: qWeeks }) => (
         <div key={label} className="flex items-center gap-3">
-          <span className="text-xs text-gray-500 w-6 flex-shrink-0 font-medium">{label}</span>
+          <span className="text-sm text-gray-500 w-7 flex-shrink-0 font-semibold">{label}</span>
           <div className={cn("flex flex-wrap", gapClass)}>
             {qWeeks.map((week) => {
               const { status, rate, completed, total } = getWeekStatus(week, scores, today);
