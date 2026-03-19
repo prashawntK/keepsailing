@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ScoreTrendChart } from "@/components/stats/ScoreTrendChart";
 import { StreakCalendar } from "@/components/stats/StreakCalendar";
 import { StatsOverviewCards } from "@/components/stats/StatsOverviewCards";
-import { StepBreakdownCard } from "@/components/stats/StepBreakdownCard";
+import { GoalBreakdownSection } from "@/components/stats/GoalBreakdownSection";
 import { LifeInWeeksCard } from "@/components/stats/LifeInWeeksCard";
 import { Modal } from "@/components/ui/Modal";
 import { Maximize2 } from "lucide-react";
@@ -148,21 +148,8 @@ export default function StatsPage() {
         </div>
       </Modal>
 
-      {/* Step breakdown per goal */}
-      {goalsWithSteps.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Goal Breakdown</h2>
-          {goalsWithSteps.map((goal) => (
-            <StepBreakdownCard
-              key={goal.id}
-              goalId={goal.id}
-              goalName={goal.name}
-              goalEmoji={goal.emoji}
-              period={period}
-            />
-          ))}
-        </div>
-      )}
+      {/* Goal Breakdown donut */}
+      <GoalBreakdownSection goals={goalsWithSteps} period={period} />
     </div>
   );
 }
