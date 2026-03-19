@@ -27,13 +27,17 @@ const SEVERITY_COLORS: Record<ChoreWithStatus["deadlineSeverity"], string> = {
 
 export function ChoreSection({ chores, onRefresh }: Props) {
   const [optimistic, setOptimistic] = useState<Record<string, boolean>>({});
+  // Chores hidden optimistically after completion (archived → removed from list)
+  const [hidden, setHidden] = useState<Record<string, boolean>>({});
+
+  // Only show chores that haven't been optimistically hidden
+  const visible = chores.filter((c) => !hidden[c.id]);
 
   // Sort: uncompleted by deadline urgency first, completed at bottom
-  const sorted = [...chores].sort((a, b) => {
+  const sorted = [...visible].sort((a, b) => {
     const aChecked = optimistic[a.id] ?? a.completedToday;
     const bChecked = optimistic[b.id] ?? b.completedToday;
     if (aChecked !== bChecked) return aChecked ? 1 : -1;
-    // Both unchecked — most urgent first
     return a.daysUntilDeadline - b.daysUntilDeadline;
   });
 
@@ -41,14 +45,23 @@ export function ChoreSection({ chores, onRefresh }: Props) {
     const newVal = !(optimistic[id] ?? currentlyCompleted);
     setOptimistic((prev) => ({ ...prev, [id]: newVal }));
 
+    // Hide immediately when completing — completing archives the chore
+    if (newVal) setHidden((prev) => ({ ...prev, [id]: true }));
+
     fetch("/api/chores/toggle", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     })
       .then(() => onRefresh())
-      .catch(() => setOptimistic((prev) => ({ ...prev, [id]: !newVal })));
+      .catch(() => {
+        // Revert on error
+        setOptimistic((prev) => ({ ...prev, [id]: !newVal }));
+        setHidden((prev) => ({ ...prev, [id]: false }));
+      });
   }
+
+  if (sorted.length === 0) return null;
 
   return (
     <div className="space-y-2">
