@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X, Check } from "lucide-react";
+import { Plus, X, Check, ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -56,6 +56,15 @@ export function GoalForm({ initial, onSubmit, onCancel, submitLabel = "Save Goal
   }
   function updateStep(index: number, name: string) {
     setForm((f) => ({ ...f, steps: f.steps.map((s, i) => (i === index ? { ...s, name } : s)) }));
+  }
+  function moveStep(index: number, direction: "up" | "down") {
+    setForm((f) => {
+      const steps = [...f.steps];
+      const target = direction === "up" ? index - 1 : index + 1;
+      if (target < 0 || target >= steps.length) return f;
+      [steps[index], steps[target]] = [steps[target], steps[index]];
+      return { ...f, steps };
+    });
   }
 
   function toggleDay(d: number) {
@@ -230,6 +239,28 @@ export function GoalForm({ initial, onSubmit, onCancel, submitLabel = "Save Goal
             const done = !!step.completedAt;
             return (
               <div key={i} className="flex gap-2 items-center">
+                {/* Up / Down reorder */}
+                <div className="flex flex-col flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => moveStep(i, "up")}
+                    disabled={i === 0}
+                    className="p-0.5 text-gray-600 hover:text-gray-300 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                    title="Move up"
+                  >
+                    <ChevronUp size={12} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => moveStep(i, "down")}
+                    disabled={i === form.steps.length - 1}
+                    className="p-0.5 text-gray-600 hover:text-gray-300 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                    title="Move down"
+                  >
+                    <ChevronDown size={12} />
+                  </button>
+                </div>
+
                 {done ? (
                   <div className="w-5 h-5 rounded-full bg-success/20 border border-success/50 flex items-center justify-center flex-shrink-0">
                     <Check size={10} className="text-success" />

@@ -33,26 +33,41 @@ export default function GoalsPage() {
 
   const fetchGoals = useCallback(async () => {
     setLoading(true);
-    const res = await fetch(`/api/goals?archived=${showArchived}`);
-    const data = await res.json();
-    setGoals(data);
-    setLoading(false);
+    try {
+      const res = await fetch(`/api/goals?archived=${showArchived}`);
+      const data = await res.json();
+      setGoals(data);
+    } catch {
+      // silently ignore — loading spinner will clear
+    } finally {
+      setLoading(false);
+    }
   }, [showArchived]);
 
   const fetchExtras = useCallback(async () => {
     setLoading(true);
-    const res = await fetch(`/api/extra-curriculars?archived=${showArchived}`);
-    const data = await res.json();
-    setEcItems(data);
-    setLoading(false);
+    try {
+      const res = await fetch(`/api/extra-curriculars?archived=${showArchived}`);
+      const data = await res.json();
+      setEcItems(data);
+    } catch {
+      // silently ignore — loading spinner will clear
+    } finally {
+      setLoading(false);
+    }
   }, [showArchived]);
 
   const fetchChores = useCallback(async () => {
     setLoading(true);
-    const res = await fetch(`/api/chores?archived=${showArchived}`);
-    const data = await res.json();
-    setChoreItems(data);
-    setLoading(false);
+    try {
+      const res = await fetch(`/api/chores?archived=${showArchived}`);
+      const data = await res.json();
+      setChoreItems(data);
+    } catch {
+      // silently ignore — loading spinner will clear
+    } finally {
+      setLoading(false);
+    }
   }, [showArchived]);
 
   useEffect(() => {
