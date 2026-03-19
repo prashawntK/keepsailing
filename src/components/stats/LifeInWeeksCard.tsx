@@ -25,23 +25,62 @@ interface Week {
   end: string;   // "YYYY-MM-DD"
 }
 
+interface Quarter {
+  label: string;
+  weeks: Week[];
+}
+
 // ─── helpers ────────────────────────────────────────────────────────────────
 
-function getWeeksOfYear(year: number): Week[] {
-  const weeks: Week[] = [];
-  const yearEnd = new Date(year, 11, 31);
-  const cursor = new Date(year, 0, 1);
+/**
+ * Builds weeks that respect Sun–Sat boundaries, but clipped to each quarter.
+ *
+ * Rules:
+ * - Each quarter's first week starts on the quarter's first day (Jan 1, Apr 1,
+ *   Jul 1, Oct 1) and ends on the first Saturday on or after that day.
+ * - Subsequent weeks run Sun–Sat as normal.
+ * - The quarter's last week is truncated at the quarter's last day, even if
+ *   that falls before Saturday.
+ * - Week numbers are sequential across the whole year.
+ */
+function getQuartersWithWeeks(year: number): Quarter[] {
+  const quarterDefs = [
+    { label: "Q1", start: new Date(year, 0, 1),  end: new Date(year, 2, 31)  },
+    { label: "Q2", start: new Date(year, 3, 1),  end: new Date(year, 5, 30)  },
+    { label: "Q3", start: new Date(year, 6, 1),  end: new Date(year, 8, 30)  },
+    { label: "Q4", start: new Date(year, 9, 1),  end: new Date(year, 11, 31) },
+  ];
 
-  while (cursor <= yearEnd) {
-    const start = format(new Date(cursor), "yyyy-MM-dd");
-    const endDate = new Date(cursor);
-    endDate.setDate(endDate.getDate() + 6);
-    const end = format(endDate > yearEnd ? yearEnd : endDate, "yyyy-MM-dd");
-    weeks.push({ weekNum: weeks.length + 1, start, end });
-    cursor.setDate(cursor.getDate() + 7);
-  }
+  let weekNum = 1;
 
-  return weeks;
+  return quarterDefs.map(({ label, start, end }) => {
+    const weeks: Week[] = [];
+    const cursor = new Date(start);
+
+    while (cursor <= end) {
+      const weekStart = format(new Date(cursor), "yyyy-MM-dd");
+
+      // Find next Saturday (dayOfWeek: 0=Sun … 6=Sat)
+      const dow = cursor.getDay();
+      const daysUntilSat = dow === 6 ? 0 : 6 - dow;
+      const endDate = new Date(cursor);
+      endDate.setDate(endDate.getDate() + daysUntilSat);
+
+      // Clip to quarter end
+      if (endDate > end) endDate.setTime(end.getTime());
+
+      weeks.push({
+        weekNum: weekNum++,
+        start: weekStart,
+        end: format(endDate, "yyyy-MM-dd"),
+      });
+
+      // Advance cursor to the Sunday after this Saturday
+      cursor.setDate(endDate.getDate() + 1);
+    }
+
+    return { label, weeks };
+  });
 }
 
 function getWeekStatus(
@@ -106,19 +145,13 @@ function boxClasses(status: WeekStatus): string {
 // ─── grid sub-component ──────────────────────────────────────────────────────
 
 interface WeekGridProps {
-  weeks: Week[];
+  quarters: Quarter[];
   scores: DayScore[];
   today: string;
   boxSize: "sm" | "lg";
 }
 
-function WeekGrid({ weeks, scores, today, boxSize }: WeekGridProps) {
-  const quarters = [
-    { label: "Q1", weeks: weeks.slice(0, 13) },
-    { label: "Q2", weeks: weeks.slice(13, 26) },
-    { label: "Q3", weeks: weeks.slice(26, 39) },
-    { label: "Q4", weeks: weeks.slice(39) },
-  ];
+function WeekGrid({ quarters, scores, today, boxSize }: WeekGridProps) {
 
   const sizeClass = boxSize === "sm" ? "w-[10px] h-[10px]" : "w-5 h-5";
   const gapClass  = boxSize === "sm" ? "gap-[3px]" : "gap-1";
@@ -186,13 +219,14 @@ function Legend() {
 export function LifeInWeeksCard({ scores, year }: LifeInWeeksCardProps) {
   const [expanded, setExpanded] = useState(false);
   const today = format(new Date(), "yyyy-MM-dd");
-  const weeks = getWeeksOfYear(year);
+  const quarters = getQuartersWithWeeks(year);
+  const allWeeks = quarters.flatMap((q) => q.weeks);
 
-  const greenCount = weeks.filter(
+  const greenCount = allWeeks.filter(
     (w) => getWeekStatus(w, scores, today).status === "green"
   ).length;
 
-  const totalPast = weeks.filter((w) => w.end <= today).length;
+  const totalPast = allWeeks.filter((w) => w.end <= today).length;
 
   return (
     <>
@@ -217,7 +251,7 @@ export function LifeInWeeksCard({ scores, year }: LifeInWeeksCardProps) {
         </div>
 
         {/* Compact grid */}
-        <WeekGrid weeks={weeks} scores={scores} today={today} boxSize="sm" />
+        <WeekGrid quarters={quarters} scores={scores} today={today} boxSize="sm" />
         <Legend />
       </div>
 
@@ -232,7 +266,7 @@ export function LifeInWeeksCard({ scores, year }: LifeInWeeksCardProps) {
           <p className="text-xs text-gray-500 mb-4">
             {greenCount} / {totalPast} weeks on track this year
           </p>
-          <WeekGrid weeks={weeks} scores={scores} today={today} boxSize="lg" />
+          <WeekGrid quarters={quarters} scores={scores} today={today} boxSize="lg" />
           <Legend />
         </div>
       </Modal>
