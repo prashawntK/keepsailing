@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { ScoreTrendChart } from "@/components/stats/ScoreTrendChart";
-import { CategoryPieChart } from "@/components/stats/CategoryPieChart";
 import { StreakCalendar } from "@/components/stats/StreakCalendar";
 import { StatsOverviewCards } from "@/components/stats/StatsOverviewCards";
 import { StepBreakdownCard } from "@/components/stats/StepBreakdownCard";
 import { LifeInWeeksCard } from "@/components/stats/LifeInWeeksCard";
+import { Modal } from "@/components/ui/Modal";
+import { Maximize2 } from "lucide-react";
 import type { OverviewStats } from "@/types";
 
 type Period = "week" | "month";
@@ -25,9 +26,9 @@ export default function StatsPage() {
   const [overview, setOverview] = useState<OverviewStats | null>(null);
   const [goalsWithSteps, setGoalsWithSteps] = useState<GoalSummary[]>([]);
   const [scoreTrend, setScoreTrend] = useState<{ date: string; score: number }[]>([]);
-  const [categoryData, setCategoryData] = useState<{ name: string; value: number }[]>([]);
   const [calendarScores, setCalendarScores] = useState<DayScore[]>([]);
   const [loading, setLoading] = useState(true);
+  const [heatmapExpanded, setHeatmapExpanded] = useState(false);
 
   const currentYear = new Date().getFullYear();
 
@@ -36,16 +37,14 @@ export default function StatsPage() {
     const yearStart = `${currentYear}-01-01`;
     const yearEnd   = `${currentYear}-12-31`;
 
-    const [ov, trend, cat, calYear, goals] = await Promise.all([
+    const [ov, trend, calYear, goals] = await Promise.all([
       fetch(`/api/stats/overview?period=${period}`).then((r) => r.json()),
       fetch(`/api/stats/charts?type=daily_scores&period=${period}`).then((r) => r.json()),
-      fetch(`/api/stats/charts?type=category_breakdown&period=${period}`).then((r) => r.json()),
       fetch(`/api/scores?from=${yearStart}&to=${yearEnd}&fill=true`).then((r) => r.json()),
       fetch(`/api/goals`).then((r) => r.json()),
     ]);
     setOverview(ov);
     setScoreTrend(trend);
-    setCategoryData(cat);
     setCalendarScores(calYear ?? []);
     setGoalsWithSteps(goals ?? []);
     setLoading(false);
@@ -115,22 +114,34 @@ export default function StatsPage() {
         <ScoreTrendChart data={scoreTrend} />
       </div>
 
-      {/* Category breakdown */}
-      <div className="glass-card p-4 group">
-        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 group-hover:text-primary transition-colors">Time by Category</h2>
-        <CategoryPieChart data={categoryData} />
+      {/* Activity heatmap + Life in weeks — side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Activity Heatmap */}
+        <div className="glass-card p-4 group">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider group-hover:text-primary transition-colors">
+              Activity Heatmap — {currentYear}
+            </h2>
+            <button
+              onClick={() => setHeatmapExpanded(true)}
+              className="p-1.5 rounded-lg text-secondary hover:text-primary hover:bg-surface-2 cursor-pointer transition-colors"
+            >
+              <Maximize2 size={14} />
+            </button>
+          </div>
+          <StreakCalendar scores={calendarScores} year={currentYear} />
+        </div>
+
+        {/* Life in weeks */}
+        <LifeInWeeksCard scores={calendarScores} year={currentYear} />
       </div>
 
-      {/* Activity heatmap — calendar year, Jan 1 → today */}
-      <div className="glass-card p-4 group">
-        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 group-hover:text-primary transition-colors">
-          Activity Heatmap — {currentYear}
-        </h2>
-        <StreakCalendar scores={calendarScores} year={currentYear} />
-      </div>
-
-      {/* Life in weeks */}
-      <LifeInWeeksCard scores={calendarScores} year={currentYear} />
+      {/* Heatmap expanded modal */}
+      <Modal open={heatmapExpanded} onClose={() => setHeatmapExpanded(false)} title={`Activity Heatmap — ${currentYear}`}>
+        <div className="overflow-x-auto">
+          <StreakCalendar scores={calendarScores} year={currentYear} />
+        </div>
+      </Modal>
 
       {/* Step breakdown per goal */}
       {goalsWithSteps.length > 0 && (
