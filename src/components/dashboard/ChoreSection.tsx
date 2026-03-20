@@ -121,12 +121,15 @@ export function ChoreSection({ chores, onRefresh }: Props) {
             <div
               key={chore.id}
               style={{
-                maxHeight: isExiting ? 0 : 120,
+                maxHeight: isExiting ? 0 : 140,
                 opacity: isExiting ? 0 : 1,
                 marginBottom: isExiting ? 0 : 10,
+                // padding gives the hover lift room so overflow:hidden doesn't clip it
+                paddingTop: 4,
+                paddingBottom: 4,
                 overflow: "hidden",
                 transition: isExiting
-                  ? "max-height 0.4s ease-in, opacity 0.35s ease-in, margin-bottom 0.4s ease-in"
+                  ? "max-height 0.45s ease-in, opacity 0.35s ease-in, margin-bottom 0.45s ease-in"
                   : "margin-bottom 0s",
               }}
             >
