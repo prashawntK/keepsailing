@@ -8,6 +8,7 @@ import { todayString, isGoalActiveOnDate } from "@/lib/utils";
 import { calculateDailyScore } from "@/lib/scoring";
 import type { DashboardData, ChoreWithStatus } from "@/types";
 import { persistDailyScore } from "@/lib/scoring-server";
+import { getWeekDatesRange, getWeeklyBankingStatus } from "@/lib/banking";
 
 export async function assembleDashboardData(date?: string, userId?: string | null): Promise<DashboardData> {
   const d = date ?? todayString();
@@ -18,7 +19,9 @@ export async function assembleDashboardData(date?: string, userId?: string | nul
     return dt.toISOString().slice(0, 10);
   })();
 
-  const [goals, overallStreakRecord, yesterdayScore, pointsAggregate, ecItems, ecTodayLogs, choreItems] =
+  const weekDates = getWeekDatesRange(d);
+
+  const [goals, overallStreakRecord, yesterdayScore, pointsAggregate, ecItems, ecTodayLogs, choreItems, weeklyLogs] =
     await Promise.all([
       prisma.goal.findMany({
         where: { isArchived: false, ...(userId ? { userId } : {}) },
@@ -62,7 +65,19 @@ export async function assembleDashboardData(date?: string, userId?: string | nul
           },
         },
       }),
+      prisma.dailyLog.findMany({
+        where: { date: { in: weekDates }, ...(userId ? { userId } : {}) },
+        select: { goalId: true, date: true, timeSpent: true },
+      }),
     ]);
+
+  // Group weekly logs by goalId for banking calculations
+  const weeklyLogsByGoal = new Map<string, Array<{ date: string; timeSpent: number }>>();
+  for (const l of weeklyLogs) {
+    const existing = weeklyLogsByGoal.get(l.goalId) ?? [];
+    existing.push({ date: l.date, timeSpent: l.timeSpent });
+    weeklyLogsByGoal.set(l.goalId, existing);
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const goalsWithProgress = goals.map((goal: any) => {
@@ -70,9 +85,22 @@ export async function assembleDashboardData(date?: string, userId?: string | nul
     const streak = goal.streaks[0] ?? { id: "", currentStreak: 0, longestStreak: 0 };
     const activeSession = goal.timerSessions[0] ?? null;
     const isActiveToday = isGoalActiveOnDate(goal.activeDays, d);
+    const activeDays = Array.isArray(goal.activeDays)
+      ? goal.activeDays
+      : JSON.parse(goal.activeDays ?? "[]");
+
+    const bankingStatus = getWeeklyBankingStatus(
+      goal.goalType,
+      goal.dailyTarget,
+      activeDays,
+      d,
+      weeklyLogsByGoal.get(goal.id) ?? []
+    );
 
     let completionPercentage = 0;
-    if (goal.goalType === "checkbox") {
+    if (bankingStatus.isBanked) {
+      completionPercentage = 100;
+    } else if (goal.goalType === "checkbox") {
       completionPercentage = log?.completed ? 100 : 0;
     } else if (goal.dailyTarget > 0) {
       completionPercentage = Math.min(
@@ -118,6 +146,10 @@ export async function assembleDashboardData(date?: string, userId?: string | nul
         : null,
       completionPercentage: Math.round(completionPercentage),
       isActiveToday,
+      isBanked: bankingStatus.isBanked,
+      bankingInfo: bankingStatus.weeklyTarget > 0
+        ? { weeklyTotal: bankingStatus.weeklyTotal, weeklyTarget: bankingStatus.weeklyTarget }
+        : null,
       steps: (goal.steps ?? []).map((s: any) => ({
         id: s.id,
         name: s.name,
@@ -142,6 +174,7 @@ export async function assembleDashboardData(date?: string, userId?: string | nul
         isActiveToday: g.isActiveToday,
         timeSpent: g.todayLog?.timeSpent ?? 0,
         completed: g.todayLog?.completed ?? false,
+        isBanked: g.isBanked,
       })),
     activeGoalStreaks: goalsWithProgress.filter((g: any) => g.streak.currentStreak > 0).length,
     overallStreakActive: (overallStreakRecord?.currentStreak ?? 0) > 0,

@@ -1,4 +1,5 @@
 import { parseActiveDays } from "./utils";
+import { getWeekDatesRange, getWeeklyBankingStatus } from "./banking";
 
 // Milestone thresholds
 export const MILESTONES = [3, 7, 14, 21, 30, 60, 90, 180, 365];
@@ -23,7 +24,9 @@ export function calculateGoalStreak(
   today: string,
   freezesAvailable: number = 0
 ): StreakResult {
-  // Build a set of dates with a qualifying log
+  const activeDays = parseActiveDays(goal.activeDays);
+
+  // Build a set of dates with a qualifying log (actual completion OR banked)
   const completedDates = new Set<string>();
   for (const log of logs) {
     const isCompleted =
@@ -33,7 +36,33 @@ export function calculateGoalStreak(
     if (isCompleted) completedDates.add(log.date);
   }
 
-  const activeDays = parseActiveDays(goal.activeDays);
+  // For timer goals: also mark all active days in weeks where weekly target was met
+  if (goal.goalType === "timer" && goal.dailyTarget > 0 && activeDays.length > 0) {
+    // Collect all unique weeks from log dates
+    const weekStarts = new Set<string>();
+    for (const log of logs) {
+      weekStarts.add(getWeekDatesRange(log.date)[0]);
+    }
+    for (const weekStart of weekStarts) {
+      const weekDates = getWeekDatesRange(weekStart);
+      const weekLogs = logs.filter((l) => weekDates.includes(l.date));
+      const { isBanked: weeklyMet } = getWeeklyBankingStatus(
+        goal.goalType,
+        goal.dailyTarget,
+        activeDays,
+        // Use last day of week (Sat) to check banking — on that day todayTimeSpent check is irrelevant
+        weekDates[6],
+        weekLogs
+      );
+      if (weeklyMet || weekLogs.reduce((s, l) => s + l.timeSpent, 0) >= goal.dailyTarget * activeDays.length) {
+        // Mark all active days in this week as effectively completed
+        for (const d of weekDates) {
+          const dow = new Date(d + "T00:00:00").getDay();
+          if (activeDays.includes(dow)) completedDates.add(d);
+        }
+      }
+    }
+  }
 
   // Walk backwards from today to find current streak
   let currentStreak = 0;

@@ -49,15 +49,23 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
   // Hide the current step indicator immediately when its complete button is clicked
   const displayCurrentStep = completedStepId === goal.currentStep?.id ? null : goal.currentStep;
 
-  const rawPct = goal.goalType === "checkbox"
-    ? (displayCompleted ? 100 : 0)
-    : goal.dailyTarget > 0
-      ? Math.min(120, (displayTimeSpent / goal.dailyTarget) * 100)
-      : 0;
+  // If user starts working on a "banked" goal today, flip to real progress
+  const isBanked = goal.isBanked && displayTimeSpent === 0;
+
+  const rawPct = isBanked
+    ? 100
+    : goal.goalType === "checkbox"
+      ? (displayCompleted ? 100 : 0)
+      : goal.dailyTarget > 0
+        ? Math.min(120, (displayTimeSpent / goal.dailyTarget) * 100)
+        : 0;
   const pct = Math.min(rawPct, 100);
   const statusBg = getStatusBg(pct);
 
-  const ringColor = pct >= 100 ? "#22C55E" : pct >= 80 ? "#34D399" : pct >= 50 ? "#F59E0B" : "#F87171";
+  // Sky-blue for banked, green shades for completed, amber/red for in-progress
+  const ringColor = isBanked
+    ? "#38BDF8"
+    : pct >= 100 ? "#22C55E" : pct >= 80 ? "#34D399" : pct >= 50 ? "#F59E0B" : "#F87171";
 
   async function handleTimerClick() {
     if (isActive) {
@@ -137,7 +145,8 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
     <div
       className={cn(
         "relative p-4 glass-card group transition-all duration-300 overflow-hidden",
-        isActive && "ring-1 ring-primary/60 glow-primary border-primary/30"
+        isActive && "ring-1 ring-primary/60 glow-primary border-primary/30",
+        isBanked && "opacity-75"
       )}
       style={isLight ? undefined : {
         background: `linear-gradient(145deg, rgba(17, 24, 39, 0.3) 0%, rgba(17, 24, 39, 0.6) 100%), ${pct >= 100 ? 'rgba(34, 197, 94, 0.03)' : pct >= 80 ? 'rgba(52, 211, 153, 0.03)' : pct >= 50 ? 'rgba(245, 158, 11, 0.03)' : 'rgba(239, 68, 68, 0.03)'}`
@@ -204,13 +213,21 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
 
           {goal.goalType === "timer" && (
             <div className="mt-1 flex items-center gap-2 text-sm text-gray-400">
-              <span>
-                {formatHours(displayTimeSpent)} / {formatHours(goal.dailyTarget)}
-              </span>
-              <span className="text-gray-600">·</span>
-              <span className={pct >= 100 ? "text-success" : "text-gray-500"}>
-                {Math.round(pct)}%
-              </span>
+              {isBanked ? (
+                <span className="text-sky-400 font-medium text-xs">
+                  ✓ Banked · {formatHours(goal.bankingInfo?.weeklyTotal ?? 0)} / {formatHours(goal.bankingInfo?.weeklyTarget ?? 0)} this week
+                </span>
+              ) : (
+                <>
+                  <span>
+                    {formatHours(displayTimeSpent)} / {formatHours(goal.dailyTarget)}
+                  </span>
+                  <span className="text-gray-600">·</span>
+                  <span className={pct >= 100 ? "text-success" : "text-gray-500"}>
+                    {Math.round(pct)}%
+                  </span>
+                </>
+              )}
             </div>
           )}
 

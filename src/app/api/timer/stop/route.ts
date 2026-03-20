@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { withApiHandler, getAuthUserId } from "@/lib/api";
-import { persistDailyScore } from "@/lib/scoring-server";
+import { recomputeWeekScores } from "@/lib/scoring-server";
 
 export const POST = withApiHandler(async (req: NextRequest) => {
   const userId = await getAuthUserId();
@@ -45,7 +45,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   });
 
   // Persist today's score after timer stop
-  await persistDailyScore(session.date, userId);
+  await recomputeWeekScores(session.date, userId);
 
   return NextResponse.json({ session: updatedSession, log });
 });

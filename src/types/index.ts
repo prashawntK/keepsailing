@@ -66,6 +66,8 @@ export interface GoalWithProgress {
 
   completionPercentage: number;
   isActiveToday: boolean;
+  isBanked: boolean;
+  bankingInfo: { weeklyTotal: number; weeklyTarget: number } | null;
 
   // Steps (optional — goals may have 0 steps)
   steps: StepData[];

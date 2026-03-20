@@ -19,6 +19,7 @@ export interface ScoreGoalInput {
   isActiveToday: boolean;
   timeSpent: number;
   completed: boolean;
+  isBanked?: boolean; // weekly target already met — counts as fully completed
 }
 
 export interface ScoreInput {
@@ -67,7 +68,10 @@ export function calculateDailyScore(input: ScoreInput): ScoreOutput {
     const weight = PRIORITY_WEIGHTS[goal.priority] ?? 1;
     let completion = 0;
 
-    if (goal.goalType === "checkbox") {
+    if (goal.isBanked) {
+      // Weekly target already met — full credit, no over-achievement bonus
+      completion = 1;
+    } else if (goal.goalType === "checkbox") {
       completion = goal.completed ? 1 : 0;
     } else {
       completion =
@@ -85,7 +89,11 @@ export function calculateDailyScore(input: ScoreInput): ScoreOutput {
   const goalCompletion = Math.min(60, Math.round(goalCompletionRaw * 60));
 
   // 2. Time Investment (0-25)
-  const totalHours = activeGoals.reduce((sum, g) => sum + g.timeSpent, 0);
+  // Banked goals contribute their dailyTarget to both sides → ratio = 1.0 for that goal
+  const totalHours = activeGoals.reduce(
+    (sum, g) => sum + (g.isBanked ? g.dailyTarget : g.timeSpent),
+    0
+  );
   const targetHours = activeGoals
     .filter((g) => g.goalType === "timer")
     .reduce((sum, g) => sum + g.dailyTarget, 0);

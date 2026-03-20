@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { todayString } from "@/lib/utils";
 import { withApiHandler, getAuthUserId } from "@/lib/api";
-import { persistDailyScore } from "@/lib/scoring-server";
+import { recomputeWeekScores } from "@/lib/scoring-server";
 
 export const POST = withApiHandler(async (req: NextRequest) => {
   const userId = await getAuthUserId();
@@ -34,7 +34,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
         update: { completed: remainingCount === 0 },
         create: { goalId, date: logDate, completed: remainingCount === 0, targetAtTime: goal.dailyTarget, userId },
       });
-      persistDailyScore(logDate, userId).catch(console.error);
+      recomputeWeekScores(logDate, userId).catch(console.error);
       return NextResponse.json(log);
     } else {
       // All steps done — toggling reverts the last completed step
@@ -50,7 +50,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
         update: { completed: false },
         create: { goalId, date: logDate, completed: false, targetAtTime: goal.dailyTarget, userId },
       });
-      persistDailyScore(logDate, userId).catch(console.error);
+      recomputeWeekScores(logDate, userId).catch(console.error);
       return NextResponse.json(log);
     }
   }
@@ -65,6 +65,6 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     update: { completed: newCompleted },
     create: { goalId, date: logDate, completed: newCompleted, targetAtTime: goal.dailyTarget, userId },
   });
-  await persistDailyScore(logDate, userId);
+  await recomputeWeekScores(logDate, userId);
   return NextResponse.json(log);
 });

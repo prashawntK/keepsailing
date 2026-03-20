@@ -1,7 +1,8 @@
 import "server-only";
 import { prisma } from "@/lib/db";
-import { isGoalActiveOnDate } from "@/lib/utils";
+import { isGoalActiveOnDate, todayString } from "@/lib/utils";
 import { calculateDailyScore, type ScoreGoalInput, type ScoreOutput } from "@/lib/scoring";
+import { getWeekDatesRange, getWeeklyBankingStatus } from "@/lib/banking";
 
 /**
  * Lightweight score computation for a given date.
@@ -11,14 +12,41 @@ export async function computeScoreForDate(
   date: string,
   userId?: string
 ): Promise<ScoreOutput & { overallStreakActive: boolean }> {
-  const goals = await prisma.goal.findMany({
-    where: { isArchived: false, ...(userId ? { userId } : {}) },
-    include: { dailyLogs: { where: { date } }, streaks: true },
-  });
+  const weekDates = getWeekDatesRange(date);
+
+  const [goals, weeklyLogs] = await Promise.all([
+    prisma.goal.findMany({
+      where: { isArchived: false, ...(userId ? { userId } : {}) },
+      include: { dailyLogs: { where: { date } }, streaks: true },
+    }),
+    prisma.dailyLog.findMany({
+      where: {
+        date: { in: weekDates },
+        ...(userId ? { userId } : {}),
+      },
+      select: { goalId: true, date: true, timeSpent: true },
+    }),
+  ]);
+
+  // Group weekly logs by goalId
+  const weeklyLogsByGoal = new Map<string, Array<{ date: string; timeSpent: number }>>();
+  for (const l of weeklyLogs) {
+    const existing = weeklyLogsByGoal.get(l.goalId) ?? [];
+    existing.push({ date: l.date, timeSpent: l.timeSpent });
+    weeklyLogsByGoal.set(l.goalId, existing);
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const scoreGoals: ScoreGoalInput[] = goals.map((g: any) => {
     const log = g.dailyLogs[0];
+    const activeDays = Array.isArray(g.activeDays) ? g.activeDays : JSON.parse(g.activeDays ?? "[]");
+    const { isBanked } = getWeeklyBankingStatus(
+      g.goalType,
+      g.dailyTarget,
+      activeDays,
+      date,
+      weeklyLogsByGoal.get(g.id) ?? []
+    );
     return {
       goalType: g.goalType as "timer" | "checkbox",
       dailyTarget: g.dailyTarget,
@@ -26,6 +54,7 @@ export async function computeScoreForDate(
       isActiveToday: isGoalActiveOnDate(g.activeDays, date),
       timeSpent: log?.timeSpent ?? 0,
       completed: log?.completed ?? false,
+      isBanked,
     };
   });
 
@@ -46,6 +75,21 @@ export async function computeScoreForDate(
   });
 
   return { ...result, overallStreakActive };
+}
+
+/**
+ * Recompute and persist scores for every day in the same week as `date`,
+ * from `date` through today. Call this after any time-logging action so that
+ * banking changes propagate to subsequent days in the same week.
+ */
+export async function recomputeWeekScores(date: string, userId?: string): Promise<void> {
+  const today = todayString();
+  const weekDates = getWeekDatesRange(date);
+  for (const d of weekDates) {
+    if (d >= date && d <= today) {
+      await persistDailyScore(d, userId);
+    }
+  }
 }
 
 /**
