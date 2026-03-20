@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { Fragment, useState, useCallback } from "react";
 import { cn, parseActiveDays, PRIORITY_LABELS } from "@/lib/utils";
 import type { Goal } from "@/types";
 import { useToast } from "@/lib/toast";
@@ -139,9 +139,9 @@ export function GoalScheduleMatrix({ goals, onRefresh }: GoalScheduleMatrixProps
           </thead>
           <tbody>
             {groups.map((group) => (
-              <>
+              <Fragment key={group.key}>
                 {/* Priority group header */}
-                <tr key={`header-${group.key}`}>
+                <tr>
                   <td
                     colSpan={9}
                     className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-gray-600"
@@ -164,7 +164,7 @@ export function GoalScheduleMatrix({ goals, onRefresh }: GoalScheduleMatrixProps
                     />
                   );
                 })}
-              </>
+              </Fragment>
             ))}
           </tbody>
         </table>
