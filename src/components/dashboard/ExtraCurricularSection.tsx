@@ -21,44 +21,44 @@ function getStaleness(item: ExtraCurricularWithStatus): StalenessLevel {
   return "stale";
 }
 
-/** Returns { boxShadow, borderColor, bgTint } for each staleness level */
+/** Returns subtle 3D glass orb styles for each staleness level */
 function getOrbStyles(level: StalenessLevel, isHovered: boolean) {
-  const intensity = isHovered ? 1.5 : 1;
+  const h = isHovered;
+  const base3d = `inset 0 1px 1px rgba(255,255,255,0.12), inset 0 -1px 3px rgba(0,0,0,0.2), 0 4px 10px rgba(0,0,0,0.25)`;
   switch (level) {
     case "recharged":
       return {
-        boxShadow: `0 0 ${16 * intensity}px ${6 * intensity}px rgba(34, 197, 94, 0.35),
-                     inset 0 0 ${10 * intensity}px rgba(34, 197, 94, 0.15)`,
-        borderColor: "rgba(34, 197, 94, 0.4)",
-        bgTint: "rgba(34, 197, 94, 0.08)",
+        background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.15) 0%, transparent 50%), var(--glass-bg)`,
+        boxShadow: `0 0 ${h ? 18 : 12}px ${h ? 6 : 4}px rgba(34,197,94,0.3), ${base3d}`,
+        borderColor: "rgba(34,197,94,0.4)",
+        bgTint: "rgba(34,197,94,0.08)",
       };
     case "fresh":
       return {
-        boxShadow: `0 0 ${10 * intensity}px ${3 * intensity}px rgba(34, 197, 94, 0.2),
-                     inset 0 0 ${6 * intensity}px rgba(34, 197, 94, 0.08)`,
-        borderColor: "rgba(34, 197, 94, 0.25)",
-        bgTint: "rgba(34, 197, 94, 0.04)",
+        background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.12) 0%, transparent 50%), var(--glass-bg)`,
+        boxShadow: `0 0 ${h ? 12 : 8}px ${h ? 4 : 2}px rgba(34,197,94,0.18), ${base3d}`,
+        borderColor: "rgba(34,197,94,0.25)",
+        bgTint: "rgba(34,197,94,0.04)",
       };
     case "fading":
       return {
-        boxShadow: `0 0 ${10 * intensity}px ${3 * intensity}px rgba(245, 158, 11, 0.25),
-                     inset 0 0 ${6 * intensity}px rgba(245, 158, 11, 0.1)`,
-        borderColor: "rgba(245, 158, 11, 0.3)",
-        bgTint: "rgba(245, 158, 11, 0.05)",
+        background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.12) 0%, transparent 50%), var(--glass-bg)`,
+        boxShadow: `0 0 ${h ? 12 : 8}px ${h ? 4 : 2}px rgba(245,158,11,0.22), ${base3d}`,
+        borderColor: "rgba(245,158,11,0.28)",
+        bgTint: "rgba(245,158,11,0.05)",
       };
     case "stale":
       return {
-        boxShadow: `0 0 ${8 * intensity}px ${2 * intensity}px rgba(239, 68, 68, 0.2),
-                     inset 0 0 ${4 * intensity}px rgba(239, 68, 68, 0.08)`,
-        borderColor: "rgba(239, 68, 68, 0.25)",
-        bgTint: "rgba(239, 68, 68, 0.04)",
+        background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.1) 0%, transparent 50%), var(--glass-bg)`,
+        boxShadow: `0 0 ${h ? 10 : 6}px ${h ? 3 : 2}px rgba(239,68,68,0.18), ${base3d}`,
+        borderColor: "rgba(239,68,68,0.22)",
+        bgTint: "rgba(239,68,68,0.04)",
       };
     case "empty":
       return {
-        boxShadow: isHovered
-          ? "0 0 8px 2px rgba(148, 163, 184, 0.15), inset 0 0 4px rgba(148, 163, 184, 0.05)"
-          : "none",
-        borderColor: "rgba(148, 163, 184, 0.15)",
+        background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.08) 0%, transparent 50%), var(--glass-bg)`,
+        boxShadow: `inset 0 1px 1px rgba(255,255,255,0.08), inset 0 -1px 3px rgba(0,0,0,0.15), 0 3px 8px rgba(0,0,0,0.2)`,
+        borderColor: "rgba(148,163,184,0.15)",
         bgTint: "transparent",
       };
   }
@@ -146,7 +146,7 @@ export function ExtraCurricularSection({ items, onRefresh }: Props) {
             >
               {/* Tooltip */}
               <div
-                className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2
+                className="pointer-events-none absolute bottom-full left-0 mb-2
                   opacity-0 group-hover:opacity-100 transition-all duration-200
                   translate-y-1 group-hover:translate-y-0
                   z-20 whitespace-nowrap"
@@ -161,13 +161,17 @@ export function ExtraCurricularSection({ items, onRefresh }: Props) {
                     WebkitBackdropFilter: "blur(var(--glass-p-blur))",
                   }}
                 >
-                  {tooltip}
+                  {item.name}
                 </div>
-                <div
-                  className="w-2 h-2 mx-auto -mt-1 rotate-45 border-b border-r border-white/10"
-                  style={{ background: "var(--glass-panel-bg)" }}
-                />
               </div>
+
+              {/* Ripple rings — rendered outside button so they overflow */}
+              {isRecharging && <>
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-16 rounded-full pointer-events-none orb-ring-1"
+                  style={{ border: "2px solid rgba(34,197,94,0.55)" }} />
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-16 rounded-full pointer-events-none orb-ring-2"
+                  style={{ border: "1.5px solid rgba(34,197,94,0.3)" }} />
+              </>}
 
               {/* Orb */}
               <button
@@ -178,7 +182,7 @@ export function ExtraCurricularSection({ items, onRefresh }: Props) {
                   ${isRecharging ? "orb-recharge" : ""}
                 `}
                 style={{
-                  background: `linear-gradient(135deg, ${orbStyle.bgTint}, var(--glass-bg))`,
+                  background: orbStyle.background,
                   backdropFilter: "blur(var(--glass-blur))",
                   WebkitBackdropFilter: "blur(var(--glass-blur))",
                   borderColor: orbStyle.borderColor,
@@ -186,8 +190,31 @@ export function ExtraCurricularSection({ items, onRefresh }: Props) {
                   transform: isHovered && !isRecharging ? "translateY(-3px)" : "translateY(0)",
                 }}
               >
+                {/* Subtle specular highlight */}
+                <span
+                  className="absolute inset-0 rounded-full pointer-events-none"
+                  style={{
+                    background: "radial-gradient(ellipse at 38% 22%, rgba(255,255,255,0.14) 0%, transparent 45%)",
+                  }}
+                />
+
+                {/* Spark particles on completion */}
+                {isRecharging && [0, 60, 120, 180, 240, 300].map((angle, i) => (
+                  <span
+                    key={angle}
+                    className="absolute top-1/2 left-1/2 w-1.5 h-1.5 rounded-full pointer-events-none"
+                    style={{
+                      background: i % 2 === 0 ? "rgba(34,197,94,0.9)" : "rgba(134,239,172,0.8)",
+                      marginTop: "-3px",
+                      marginLeft: "-3px",
+                      ["--spark-angle" as string]: `${angle}deg`,
+                      animation: `orb-spark 0.55s ease-out ${i * 25}ms forwards`,
+                    }}
+                  />
+                ))}
+
                 {/* Emoji */}
-                <span className="text-2xl leading-none">{item.emoji}</span>
+                <span className="relative text-2xl leading-none drop-shadow-sm">{item.emoji}</span>
 
                 {/* Checkmark badge for completed */}
                 {checked && (
@@ -199,18 +226,10 @@ export function ExtraCurricularSection({ items, onRefresh }: Props) {
                       boxShadow: "0 2px 8px rgba(34, 197, 94, 0.4)",
                     }}
                   >
-                    \u2713
+                    ✓
                   </span>
                 )}
               </button>
-
-              {/* Name */}
-              <span
-                className={`text-[11px] font-medium text-center max-w-[72px] truncate leading-tight
-                  ${checked ? "text-gray-500" : "text-gray-300"}`}
-              >
-                {item.name}
-              </span>
 
               {/* Staleness label */}
               <span
