@@ -8,29 +8,21 @@ interface Props {
   onRefresh: () => void;
 }
 
-function timeLabel(minutes: number | null): string | null {
-  if (!minutes) return null;
-  if (minutes < 60) return `${minutes} min`;
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return m ? `${h}h ${m}m` : `${h}h`;
+function staleDotColor(item: ExtraCurricularWithStatus): string {
+  if (item.completedToday) return "bg-success";
+  if (item.lastPerformedDaysAgo === null) return "bg-error";
+  const d = item.lastPerformedDaysAgo;
+  if (d <= 2) return "bg-success";
+  if (d <= 5) return "bg-streak";
+  return "bg-error";
 }
 
-function staleBadge(item: ExtraCurricularWithStatus) {
-  if (item.completedToday) {
-    return <span className="text-xs font-medium text-success">today</span>;
-  }
-  if (item.lastPerformedDaysAgo === null) {
-    return <span className="text-xs font-medium text-gray-500">never</span>;
-  }
+function staleTooltip(item: ExtraCurricularWithStatus): string {
+  if (item.completedToday) return "Done today ✓";
+  if (item.lastPerformedDaysAgo === null) return "Never done";
   const d = item.lastPerformedDaysAgo;
-  if (d <= 2) {
-    return <span className="text-xs font-medium text-success">{d}d ago</span>;
-  }
-  if (d <= 5) {
-    return <span className="text-xs font-medium text-streak">{d}d ago</span>;
-  }
-  return <span className="text-xs font-medium text-error">{d}d ago</span>;
+  if (d === 1) return "Done yesterday";
+  return `${d} days ago`;
 }
 
 export function ExtraCurricularSection({ items, onRefresh }: Props) {
@@ -41,7 +33,6 @@ export function ExtraCurricularSection({ items, onRefresh }: Props) {
     const aChecked = optimistic[a.id] ?? a.completedToday;
     const bChecked = optimistic[b.id] ?? b.completedToday;
     if (aChecked !== bChecked) return aChecked ? 1 : -1;
-    // Both unchecked — most stale first (null = never = top)
     const aStale = a.lastPerformedDaysAgo ?? Infinity;
     const bStale = b.lastPerformedDaysAgo ?? Infinity;
     if (aStale !== bStale) return bStale - aStale;
@@ -63,57 +54,76 @@ export function ExtraCurricularSection({ items, onRefresh }: Props) {
 
   return (
     <div className="space-y-2">
-      <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+      <h2 className="text-xs font-semibold text-xp/70 uppercase tracking-wider">
         Extra-Curriculars
       </h2>
 
-      <div className="glass-card divide-y divide-white/[0.06]">
+      <div className="flex flex-wrap gap-2">
         {sorted.map((item) => {
           const checked = optimistic[item.id] ?? item.completedToday;
-          const time = timeLabel(item.targetMinutes);
+          const tooltip = staleTooltip(item);
           return (
-            <div
-              key={item.id}
-              className="flex items-center gap-3 px-4 py-3 transition-opacity"
-              style={{ opacity: checked ? 0.6 : 1 }}
-            >
-              <button
-                onClick={() => handleToggle(item.id, item.completedToday)}
-                className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0 ${
-                  checked
-                    ? "bg-success border-success text-white"
-                    : "border-gray-500 hover:border-gray-300"
-                }`}
+            <div key={item.id} className="relative group">
+              {/* Hover tooltip */}
+              <div
+                className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2
+                  opacity-0 group-hover:opacity-100 transition-all duration-200
+                  translate-y-1 group-hover:translate-y-0
+                  z-20 whitespace-nowrap"
               >
-                {checked && (
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-              </button>
-
-              <span className="text-base">{item.emoji}</span>
-
-              <div className="flex-1 min-w-0">
-                <span className={`text-sm font-medium ${checked ? "line-through text-gray-500" : "text-gray-200"}`}>
-                  {item.name}
-                </span>
-                <span className="flex items-center gap-1.5 mt-0.5">
-                  {time && (
-                    <span className="text-xs text-gray-600">{time}</span>
-                  )}
-                  {item.totalMinutesSpent > 0 && (
-                    <>
-                      {time && <span className="text-xs text-gray-700">{"\u00B7"}</span>}
-                      <span className="text-xs text-gray-500">
-                        {timeLabel(item.totalMinutesSpent)} spent
-                      </span>
-                    </>
-                  )}
-                </span>
+                <div
+                  className="text-[11px] font-medium px-2.5 py-1 rounded-lg
+                    text-gray-200 border border-white/10
+                    shadow-lg shadow-black/30"
+                  style={{
+                    background: "var(--glass-panel-bg)",
+                    backdropFilter: "blur(var(--glass-p-blur))",
+                    WebkitBackdropFilter: "blur(var(--glass-p-blur))",
+                  }}
+                >
+                  {tooltip}
+                </div>
+                {/* Arrow */}
+                <div className="w-2 h-2 mx-auto -mt-1 rotate-45 border-b border-r border-white/10"
+                  style={{ background: "var(--glass-panel-bg)" }}
+                />
               </div>
 
-              {staleBadge(item)}
+              {/* Pill button */}
+              <button
+                onClick={() => handleToggle(item.id, item.completedToday)}
+                className={`rounded-full px-3 py-1.5 border transition-all duration-200
+                  cursor-pointer select-none inline-flex items-center gap-1.5 text-sm
+                  ${checked
+                    ? "border-xp/30 opacity-70"
+                    : "hover:border-white/20 hover:-translate-y-0.5"
+                  }`}
+                style={checked ? {
+                  background: "color-mix(in srgb, var(--color-xp) 12%, var(--glass-bg))",
+                  backdropFilter: "blur(var(--glass-blur))",
+                  WebkitBackdropFilter: "blur(var(--glass-blur))",
+                  boxShadow: "inset 0 1px 0 rgba(167,139,250,0.15)",
+                } : {
+                  background: "var(--glass-bg)",
+                  backdropFilter: "blur(var(--glass-blur))",
+                  WebkitBackdropFilter: "blur(var(--glass-blur))",
+                  border: "1px solid var(--glass-border)",
+                  borderTop: "1px solid var(--glass-border-top)",
+                  boxShadow: "var(--glass-shadow)",
+                }}
+              >
+                <span className="text-base leading-none">{item.emoji}</span>
+                <span
+                  className={`font-medium ${
+                    checked ? "line-through text-gray-500" : "text-gray-200"
+                  }`}
+                >
+                  {item.name}
+                </span>
+                <span
+                  className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${staleDotColor(item)}`}
+                />
+              </button>
             </div>
           );
         })}

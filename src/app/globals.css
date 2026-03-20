@@ -447,3 +447,7 @@ body {
 .btn-premium:hover::after {
   left: 150%;
 }
+
+/* ── Scrollbar Hide ───────────────────────────────────────────────────── */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
