@@ -42,7 +42,7 @@ export function DailyQuote() {
       </span>
 
       <p className="text-[10px] uppercase tracking-widest text-gray-500 font-semibold mb-3">
-        Daily Motivation
+        Today's Edge
       </p>
 
       <p className="text-sm leading-relaxed text-gray-200 font-medium relative z-10">
