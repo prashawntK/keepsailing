@@ -9,7 +9,7 @@ import { TimerStartModal } from "@/components/timer/TimerStartModal";
 import { useTimer } from "@/components/providers/TimerProvider";
 import { MorningView } from "@/components/adhd/MorningView";
 import { ForgivenessBanner } from "@/components/adhd/ForgivenessBanner";
-import { DailyWin } from "@/components/adhd/DailyWin";
+import { DailyQuote } from "@/components/adhd/DailyQuote";
 import { EnergyTracker } from "@/components/adhd/EnergyTracker";
 import { DecisionHelper } from "@/components/adhd/DecisionHelper";
 import { ExtraCurricularSection } from "./ExtraCurricularSection";
@@ -229,7 +229,7 @@ export function DashboardView({ initialData }: DashboardViewProps) {
 
       {/* Daily win journal */}
       <motion.div variants={itemVariants} layout>
-        <DailyWin />
+        <DailyQuote />
       </motion.div>
 
       {/* Floating timer */}
