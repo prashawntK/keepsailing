@@ -136,25 +136,25 @@ export function getStatusRing(percentage: number): string {
 // ── Category colours ──────────────────────────────────────────────────────
 export const CATEGORY_COLORS: Record<string, string> = {
   Learning: "text-purple-400",
-  Career: "text-amber-400",
+  Career: "text-cyan-400",
   Health: "text-emerald-400",
-  Personal: "text-sky-400",
+  Personal: "text-orange-400",
   Creative: "text-pink-400",
 };
 
 export const CATEGORY_BG: Record<string, string> = {
   Learning: "bg-purple-500/12",
-  Career: "bg-amber-500/12",
+  Career: "bg-cyan-500/12",
   Health: "bg-emerald-500/12",
-  Personal: "bg-sky-500/12",
+  Personal: "bg-orange-500/12",
   Creative: "bg-pink-500/12",
 };
 
 export const CATEGORY_HEX: Record<string, string> = {
   Learning: "#8B5CF6",
-  Career: "#F59E0B",
+  Career: "#06B6D4",
   Health: "#10B981",
-  Personal: "#38BDF8",
+  Personal: "#F97316",
   Creative: "#EC4899",
 };
 
