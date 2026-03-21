@@ -77,7 +77,8 @@
   --glass-panel-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 8px 32px rgba(0, 0, 0, 0.4);
   --glass-blur: 16px;
   --glass-p-blur: 24px;
-  
+  --nav-bg: rgba(17, 24, 39, 0.82);
+
   --ambient-opacity: 0.45;
   --ambient-blend: normal;
   --ambient-blur: 120px;
@@ -124,7 +125,8 @@
   --glass-panel-shadow: 0 8px 32px rgba(30, 41, 59, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   --glass-blur: 24px;
   --glass-p-blur: 32px;
-  
+  --nav-bg: rgba(240, 245, 255, 0.88);
+
   --ambient-opacity: 0.8;
   --ambient-blend: normal;
   --ambient-blur: 140px;
@@ -178,7 +180,8 @@
   --glass-panel-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 8px 32px rgba(0, 0, 0, 0.4);
   --glass-blur: 16px;
   --glass-p-blur: 24px;
-  
+  --nav-bg: rgba(27, 11, 42, 0.82);
+
   --ambient-opacity: 0.5;
   --ambient-blend: normal;
   --ambient-blur: 120px;
@@ -225,7 +228,8 @@
   --glass-panel-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 8px 32px rgba(0, 0, 0, 0.4);
   --glass-blur: 16px;
   --glass-p-blur: 24px;
-  
+  --nav-bg: rgba(17, 24, 39, 0.82);
+
   --ambient-opacity: 0.25;
   --ambient-blend: normal;
   --ambient-blur: 100px;
@@ -272,6 +276,7 @@
   --glass-panel-shadow: inset 0 1px 1px rgba(249, 115, 22, 0.05), 0 8px 32px rgba(0, 0, 0, 0.45);
   --glass-blur: 16px;
   --glass-p-blur: 24px;
+  --nav-bg: rgba(26, 17, 8, 0.88);
 
   --ambient-opacity: 0.35;
   --ambient-blend: normal;
@@ -319,6 +324,7 @@
   --glass-panel-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.03), 0 8px 32px rgba(0, 0, 0, 0.65);
   --glass-blur: 12px;
   --glass-p-blur: 20px;
+  --nav-bg: rgba(15, 15, 15, 0.92);
 
   --ambient-opacity: 0.04;
   --ambient-blend: normal;

@@ -26,7 +26,7 @@ export function Navigation() {
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       />
 
-      <nav className="fixed bottom-6 left-4 right-4 z-40 glass-panel rounded-2xl border border-white/10 shadow-2xl">
+      <nav className="fixed bottom-6 left-4 right-4 z-40 glass-panel rounded-2xl border border-white/10 shadow-2xl" style={{ background: "var(--nav-bg)", backdropFilter: "blur(24px)" }}>
         <div className="max-w-4xl mx-auto px-2 h-16 flex items-center justify-around">
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const active = pathname === href;

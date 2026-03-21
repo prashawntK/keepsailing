@@ -148,22 +148,33 @@ export default function GoalsPage() {
         <p className="text-sm text-gray-400">{pageDesc}</p>
       </div>
 
-      {/* Segmented tabs — iOS glass inset style */}
-      <div className="flex gap-1 glass-card p-1">
-        {TABS.map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setParentTab(key)}
-            className={cn(
-              "flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 border",
-              parentTab === key
-                ? "bg-primary/80 text-white shadow-sm border-primary/40"
-                : "text-gray-300 hover:text-white border-transparent"
-            )}
-          >
-            {label}
-          </button>
-        ))}
+      {/* Toggle switch tabs */}
+      <div className="relative glass-card p-1 rounded-full">
+        {/* Sliding thumb */}
+        <div
+          className="absolute top-1 bottom-1 rounded-full bg-primary/80 shadow-lg shadow-primary/25 transition-all duration-300 ease-out"
+          style={{
+            width: `calc((100% - 8px) / 3)`,
+            left: `calc(4px + ${TABS.findIndex(t => t.key === parentTab)} * ((100% - 8px) / 3))`,
+          }}
+        />
+        {/* Labels */}
+        <div className="relative flex">
+          {TABS.map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setParentTab(key)}
+              className={cn(
+                "flex-1 px-3 py-2 rounded-full text-sm font-medium transition-colors duration-200 relative z-10",
+                parentTab === key
+                  ? "text-white"
+                  : "text-gray-400 hover:text-gray-200"
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Active/Archived underline toggle + view toggle — same row */}
