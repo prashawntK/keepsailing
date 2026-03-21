@@ -46,11 +46,10 @@ export function DailyScoreCard({
             strokeWidth={8}
             color={ringColor}
           />
-          <div className="absolute inset-0 flex flex-col items-center justify-center pt-1">
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-4xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-br from-primary to-xp drop-shadow-sm">
               {Math.round(score)}
             </span>
-            <span className="text-[10px] uppercase font-bold text-gray-500 tracking-wider -mt-1">Rank</span>
           </div>
         </div>
 
