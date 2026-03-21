@@ -26,7 +26,14 @@ export function Navigation() {
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       />
 
-      <nav className="fixed bottom-6 left-4 right-4 z-40 glass-panel rounded-2xl border border-white/10 shadow-2xl" style={{ background: "var(--nav-bg)", backdropFilter: "blur(24px)" }}>
+      <nav
+        className="fixed bottom-6 left-4 right-4 z-40 glass-panel rounded-2xl border border-white/10 overflow-hidden"
+        style={{
+          background: "color-mix(in srgb, var(--nav-bg) 92%, var(--color-primary) 8%)",
+          backdropFilter: "blur(24px)",
+          boxShadow: "0 -8px 32px rgba(99,102,241,0.12), 0 8px 32px rgba(0,0,0,0.4)",
+        }}
+      >
         <div className="max-w-4xl mx-auto px-2 h-16 flex items-center justify-around">
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const active = pathname === href;
