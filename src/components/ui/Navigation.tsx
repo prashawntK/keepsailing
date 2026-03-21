@@ -27,7 +27,7 @@ export function Navigation() {
       />
 
       <nav
-        className="fixed bottom-6 left-4 right-4 z-40 glass-panel rounded-2xl border border-white/10 overflow-hidden"
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 glass-panel rounded-2xl border border-white/10 overflow-hidden w-[calc(100%-2rem)] max-w-4xl"
         style={{
           background: "color-mix(in srgb, var(--nav-bg) 92%, var(--color-primary) 8%)",
           backdropFilter: "blur(24px)",
