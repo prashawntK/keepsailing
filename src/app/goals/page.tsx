@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Plus, List, CalendarDays } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { GoalList } from "@/components/goals/GoalList";
 import { GoalScheduleMatrix } from "@/components/goals/GoalScheduleMatrix";
@@ -41,7 +40,7 @@ export default function GoalsPage() {
       const data = await res.json();
       setGoals(data);
     } catch {
-      // silently ignore — loading spinner will clear
+      // silently ignore
     } finally {
       setLoading(false);
     }
@@ -54,7 +53,7 @@ export default function GoalsPage() {
       const data = await res.json();
       setEcItems(data);
     } catch {
-      // silently ignore — loading spinner will clear
+      // silently ignore
     } finally {
       setLoading(false);
     }
@@ -67,7 +66,7 @@ export default function GoalsPage() {
       const data = await res.json();
       setChoreItems(data);
     } catch {
-      // silently ignore — loading spinner will clear
+      // silently ignore
     } finally {
       setLoading(false);
     }
@@ -79,7 +78,6 @@ export default function GoalsPage() {
     else fetchChores();
   }, [parentTab, fetchGoals, fetchExtras, fetchChores]);
 
-  // Reset archive filter when switching tabs
   useEffect(() => { setShowArchived(false); }, [parentTab]);
 
   async function handleAddGoal(data: GoalFormData) {
@@ -128,81 +126,73 @@ export default function GoalsPage() {
   }
 
   const pageTitle =
-    parentTab === "goals"
-      ? "Goals"
-      : parentTab === "extras"
-      ? "Extra-Curriculars"
-      : "Chores";
+    parentTab === "goals" ? "Goals"
+    : parentTab === "extras" ? "Extra-Curriculars"
+    : "Chores";
 
   const pageDesc =
-    parentTab === "goals"
-      ? "Manage your daily targets"
-      : parentTab === "extras"
-      ? "Track your side activities"
-      : "Things to get done before their deadline";
+    parentTab === "goals" ? "Manage your daily targets"
+    : parentTab === "extras" ? "Track your side activities"
+    : "Things to get done before their deadline";
 
   const addLabel =
-    parentTab === "goals"
-      ? "Add Goal"
-      : parentTab === "extras"
-      ? "Add Activity"
-      : "Add Chore";
+    parentTab === "goals" ? "Add Goal"
+    : parentTab === "extras" ? "Add Activity"
+    : "Add Chore";
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-100">{pageTitle}</h1>
-          <p className="text-sm text-gray-400">{pageDesc}</p>
-        </div>
-        <Button onClick={() => setShowAddModal(true)}>
-          <Plus size={16} /> {addLabel}
-        </Button>
+    <div className="space-y-4 pb-24">
+      {/* Header — title only */}
+      <div>
+        <h1 className="text-2xl font-bold text-gray-100">{pageTitle}</h1>
+        <p className="text-sm text-gray-400">{pageDesc}</p>
       </div>
 
-      {/* Parent tabs */}
+      {/* Segmented tabs — iOS glass inset style */}
       <div className="flex gap-1 glass-card p-1">
         {TABS.map(({ key, label }) => (
           <button
             key={key}
             onClick={() => setParentTab(key)}
-            className={`flex-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+            className={cn(
+              "flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 border",
               parentTab === key
-                ? "btn-premium"
-                : "text-gray-400 hover:text-gray-200"
-            }`}
+                ? "bg-primary/80 text-white shadow-sm border-primary/40"
+                : "text-gray-300 hover:text-white border-transparent"
+            )}
           >
             {label}
           </button>
         ))}
       </div>
 
-      {/* Active / Archived sub-filter + view toggle */}
+      {/* Active/Archived underline toggle + view toggle — same row */}
       <div className="flex items-center justify-between">
-        <div className="flex gap-2">
+        <div className="flex gap-5">
           <button
             onClick={() => setShowArchived(false)}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+            className={cn(
+              "text-sm font-medium pb-0.5 transition-all border-b-2",
               !showArchived
-                ? "bg-primary text-white"
-                : "text-gray-400 hover:text-gray-200"
-            }`}
+                ? "text-white border-primary"
+                : "text-gray-500 hover:text-gray-300 border-transparent"
+            )}
           >
             Active
           </button>
           <button
             onClick={() => setShowArchived(true)}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+            className={cn(
+              "text-sm font-medium pb-0.5 transition-all border-b-2",
               showArchived
-                ? "bg-primary text-white"
-                : "text-gray-400 hover:text-gray-200"
-            }`}
+                ? "text-white border-primary"
+                : "text-gray-500 hover:text-gray-300 border-transparent"
+            )}
           >
             Archived
           </button>
         </div>
 
-        {/* View toggle — only for active goals */}
         {parentTab === "goals" && !showArchived && (
           <div className="flex gap-0.5 glass-card p-0.5">
             <button
@@ -249,6 +239,17 @@ export default function GoalsPage() {
           )}
         </>
       )}
+
+      {/* Floating Action Button */}
+      <div className="fixed bottom-[100px] right-5 z-40">
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="w-14 h-14 rounded-full btn-premium shadow-2xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
+          aria-label={addLabel}
+        >
+          <Plus size={22} />
+        </button>
+      </div>
 
       {/* Add modals */}
       <Modal
