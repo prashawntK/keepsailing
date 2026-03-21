@@ -11,7 +11,6 @@ import { MorningView } from "@/components/adhd/MorningView";
 import { ForgivenessBanner } from "@/components/adhd/ForgivenessBanner";
 import { DailyQuote } from "@/components/adhd/DailyQuote";
 import { EnergyTracker } from "@/components/adhd/EnergyTracker";
-import { DecisionHelper } from "@/components/adhd/DecisionHelper";
 import { ExtraCurricularSection } from "./ExtraCurricularSection";
 import { ChoreSection } from "./ChoreSection";
 import { TimerDisplay } from "@/components/timer/TimerDisplay";
@@ -187,22 +186,6 @@ export function DashboardView({ initialData }: DashboardViewProps) {
           overallStreak={data.overallStreak}
         />
       </motion.div>
-
-      {/* Decision helper */}
-      <AnimatePresence mode="popLayout">
-        {data.goals.filter((g) => g.isActiveToday && g.completionPercentage < 100).length > 0 && (
-          <motion.div
-            key="decision-helper"
-            variants={itemVariants}
-            initial="hidden"
-            animate="show"
-            exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-            layout
-          >
-            <DecisionHelper goals={data.goals} energyLevel={null} onStartTimer={refresh} />
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Goal grid */}
       <motion.div variants={itemVariants} layout>
