@@ -28,7 +28,7 @@ export function DailyQuote() {
   return (
     <div className="py-6 px-2 text-center">
       <p className="text-sm leading-relaxed text-gray-500 mb-6">{quote}</p>
-      <p className="text-[10px] tracking-widest text-gray-700 text-right">— {author}</p>
+      <p className="text-[10px] tracking-widest text-gray-600 text-right">— {author}</p>
     </div>
   );
 }
