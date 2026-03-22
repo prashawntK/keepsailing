@@ -23,7 +23,7 @@ export async function GET() {
 
   try {
     const res = await fetch("https://zenquotes.io/api/today", {
-      next: { revalidate: 86400 },
+      cache: "no-store",
     });
 
     if (res.ok) {
