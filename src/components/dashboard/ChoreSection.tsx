@@ -92,7 +92,26 @@ export function ChoreSection({ chores, onRefresh }: Props) {
       });
   }
 
-  if (sorted.length === 0) return null;
+  if (sorted.length === 0) {
+    return (
+      <div className="space-y-2">
+        <h2 className="text-xs font-semibold text-streak/70 uppercase tracking-wider">
+          Chores
+        </h2>
+        <div
+          className="rounded-2xl px-4 py-3.5 text-sm text-gray-500 italic"
+          style={{
+            background: "var(--glass-bg)",
+            backdropFilter: "blur(var(--glass-blur))",
+            WebkitBackdropFilter: "blur(var(--glass-blur))",
+            border: "1px solid rgba(34,197,94,0.12)",
+          }}
+        >
+          No chores due — you&apos;re on top of it! 🧹
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">

@@ -28,6 +28,7 @@ export default function StatsPage() {
   const [scoreTrend, setScoreTrend] = useState<{ date: string; score: number }[]>([]);
   const [calendarScores, setCalendarScores] = useState<DayScore[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [heatmapExpanded, setHeatmapExpanded] = useState(false);
   const [accountCreatedAt, setAccountCreatedAt] = useState<string | null>(null);
 
@@ -35,25 +36,45 @@ export default function StatsPage() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    setFetchError(null);
     const yearStart = `${currentYear}-01-01`;
     const yearEnd   = `${currentYear}-12-31`;
 
-    const [ov, trend, calYear, goals, settings] = await Promise.all([
-      fetch(`/api/stats/overview?period=${period}`).then((r) => r.json()),
-      fetch(`/api/stats/charts?type=daily_scores&period=${period}`).then((r) => r.json()),
-      fetch(`/api/scores?from=${yearStart}&to=${yearEnd}&fill=true`).then((r) => r.json()),
-      fetch(`/api/goals`).then((r) => r.json()),
-      fetch(`/api/settings`).then((r) => r.json()),
-    ]);
-    setOverview(ov);
-    setScoreTrend(trend);
-    setCalendarScores(calYear ?? []);
-    setGoalsWithSteps(goals ?? []);
-    setAccountCreatedAt(settings?.accountCreatedAt ?? null);
-    setLoading(false);
+    try {
+      const [ov, trend, calYear, goals, settings] = await Promise.all([
+        fetch(`/api/stats/overview?period=${period}`).then((r) => r.json()),
+        fetch(`/api/stats/charts?type=daily_scores&period=${period}`).then((r) => r.json()),
+        fetch(`/api/scores?from=${yearStart}&to=${yearEnd}&fill=true`).then((r) => r.json()),
+        fetch(`/api/goals`).then((r) => r.json()),
+        fetch(`/api/settings`).then((r) => r.json()),
+      ]);
+      setOverview(ov);
+      setScoreTrend(trend);
+      setCalendarScores(calYear ?? []);
+      setGoalsWithSteps(goals ?? []);
+      setAccountCreatedAt(settings?.accountCreatedAt ?? null);
+    } catch {
+      setFetchError("Couldn't load stats — something went wrong.");
+    } finally {
+      setLoading(false);
+    }
   }, [period, currentYear]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  if (fetchError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
+        <p className="text-gray-400 text-sm">{fetchError}</p>
+        <button
+          onClick={fetchData}
+          className="px-4 py-2 rounded-xl bg-primary/20 border border-primary/40 text-primary text-sm font-medium hover:bg-primary/30 transition-colors"
+        >
+          Tap to retry
+        </button>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

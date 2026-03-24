@@ -120,6 +120,27 @@ export function ExtraCurricularSection({ items, onRefresh }: Props) {
     [optimistic, onRefresh],
   );
 
+  if (sorted.length === 0) {
+    return (
+      <div className="space-y-3">
+        <h2 className="text-xs font-semibold text-xp/70 uppercase tracking-wider">
+          Extra-Curriculars
+        </h2>
+        <div
+          className="rounded-2xl px-4 py-3.5 text-sm text-gray-500 italic"
+          style={{
+            background: "var(--glass-bg)",
+            backdropFilter: "blur(var(--glass-blur))",
+            WebkitBackdropFilter: "blur(var(--glass-blur))",
+            border: "1px solid rgba(148,163,184,0.12)",
+          }}
+        >
+          No activities tracked yet — add some in Goals ✨
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3">
       <h2 className="text-xs font-semibold text-xp/70 uppercase tracking-wider">

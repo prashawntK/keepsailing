@@ -3,6 +3,10 @@ import { prisma } from "@/lib/db";
 import { stripe } from "@/lib/stripe";
 import { getAuthUserId, withApiHandler } from "@/lib/api";
 
+const baseUrl =
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
 export const POST = withApiHandler(async (req: NextRequest) => {
   const userId = await getAuthUserId();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -18,7 +22,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   if (user.plan === "pro" && user.stripeCustomerId) {
     const portal = await stripe.billingPortal.sessions.create({
       customer: user.stripeCustomerId,
-      return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/settings`,
+      return_url: `${baseUrl}/settings`,
     });
     return NextResponse.json({ url: portal.url });
   }
@@ -43,8 +47,8 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     customer: stripeCustomerId,
     line_items: [{ price: priceId, quantity: 1 }],
     mode: "subscription",
-    success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/settings?upgraded=true`,
-    cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/settings`,
+    success_url: `${baseUrl}/settings?upgraded=true`,
+    cancel_url: `${baseUrl}/settings`,
     metadata: { userId },
     subscription_data: { metadata: { userId } },
     allow_promotion_codes: true,

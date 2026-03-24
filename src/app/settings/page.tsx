@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Crown, Loader2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useTheme } from "@/components/providers/ThemeProvider";
@@ -29,8 +29,11 @@ function UpgradedToast() {
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { error: showError } = useToast();
+  const router = useRouter();
   const [settings, setSettings] = useState<SettingsWithPlan | null>(null);
   const [billingLoading, setBillingLoading] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const fetchSettings = useCallback(async () => {
     const res = await fetch("/api/settings");
@@ -79,6 +82,22 @@ export default function SettingsPage() {
       showError("Portal failed", "Please try again.");
     } finally {
       setBillingLoading(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    setDeleteLoading(true);
+    try {
+      const res = await fetch("/api/account", { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error ?? "Failed to delete account");
+      }
+      router.replace("/login");
+    } catch (err) {
+      showError("Deletion failed", err instanceof Error ? err.message : "Please try again.");
+      setDeleteLoading(false);
+      setShowDeleteConfirm(false);
     }
   }
 
@@ -252,7 +271,56 @@ const row = "flex items-center justify-between py-3 border-b border-white/[0.06]
         )}
       </section>
 
-<p className="text-center text-xs text-gray-600 pb-4">ADHD Scorecard · Built with ❤️</p>
+      {/* Danger Zone */}
+      <section className="card p-4 border border-red-500/20">
+        <h2 className="text-sm font-semibold text-red-400/80 uppercase tracking-wider mb-3">Danger Zone</h2>
+        <div className={row}>
+          <div>
+            <p className="text-sm text-gray-200">Delete account</p>
+            <p className="text-xs text-gray-500 mt-0.5">Permanently delete your account and all data</p>
+          </div>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="px-3 py-1.5 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-semibold hover:bg-red-500/25 transition-colors"
+          >
+            Delete
+          </button>
+        </div>
+      </section>
+
+      <p className="text-center text-xs text-gray-600 pb-4">ADHD Scorecard · Built with ❤️</p>
+
+      {/* Delete confirmation modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="glass-card p-6 max-w-sm w-full space-y-4">
+            <div className="text-center space-y-2">
+              <div className="text-3xl">🗑️</div>
+              <h3 className="text-lg font-bold text-gray-100">Delete your account?</h3>
+              <p className="text-sm text-gray-400">
+                This will permanently delete your account and all your data — goals, scores, streaks, and everything else. This cannot be undone.
+              </p>
+            </div>
+            <div className="flex gap-3 pt-1">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleteLoading}
+                className="flex-1 py-2.5 rounded-xl bg-surface-2 border border-white/[0.08] text-gray-300 text-sm font-semibold hover:bg-surface-3 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteLoading}
+                className="flex-1 py-2.5 rounded-xl bg-red-500/20 border border-red-500/40 text-red-400 text-sm font-semibold hover:bg-red-500/30 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {deleteLoading && <Loader2 size={14} className="animate-spin" />}
+                {deleteLoading ? "Deleting…" : "Yes, delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
