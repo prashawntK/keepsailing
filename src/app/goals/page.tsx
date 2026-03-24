@@ -283,14 +283,16 @@ export default function GoalsPage() {
       </div>
 
       {/* Floating Action Button */}
-      <div className="fixed bottom-[100px] right-5 z-40">
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="w-14 h-14 rounded-full btn-premium shadow-2xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
-          aria-label={addLabel}
-        >
-          <Plus size={22} />
-        </button>
+      <div className="fixed bottom-[100px] left-0 right-0 z-40 pointer-events-none">
+        <div className="max-w-4xl mx-auto px-4 flex justify-end">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="pointer-events-auto w-14 h-14 rounded-full btn-premium shadow-2xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
+            aria-label={addLabel}
+          >
+            <Plus size={22} />
+          </button>
+        </div>
       </div>
 
       {/* Add modals */}
