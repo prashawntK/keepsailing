@@ -9,8 +9,8 @@ export const POST = withApiHandler(async (req: NextRequest) => {
 
   const { sessionId, focusRating, elapsed } = await req.json();
 
-  const session = await prisma.timerSession.findUnique({
-    where: { id: sessionId },
+  const session = await prisma.timerSession.findFirst({
+    where: { id: sessionId, userId },
   });
   if (!session)
     return NextResponse.json({ error: "Session not found" }, { status: 404 });
@@ -31,7 +31,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     },
   });
 
-  const goal = await prisma.goal.findUnique({ where: { id: session.goalId } });
+  const goal = await prisma.goal.findFirst({ where: { id: session.goalId, userId } });
   const log = await prisma.dailyLog.upsert({
     where: { goalId_date: { goalId: session.goalId, date: session.date } },
     update: { timeSpent: { increment: durationHours } },

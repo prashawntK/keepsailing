@@ -9,7 +9,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
 
   const { rewardId } = await req.json();
 
-  const reward = await prisma.reward.findUnique({ where: { id: rewardId } });
+  const reward = await prisma.reward.findFirst({ where: { id: rewardId, userId } });
   if (!reward)
     return NextResponse.json({ error: "Reward not found" }, { status: 404 });
 

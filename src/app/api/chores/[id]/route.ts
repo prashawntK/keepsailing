@@ -12,6 +12,9 @@ export const PATCH = withApiHandler(async (req: NextRequest, ctx) => {
   // Convert deadline string to Date if provided
   if (body.deadline) body.deadline = new Date(body.deadline);
 
+  const existing = await prisma.chore.findFirst({ where: { id, userId } });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   const item = await prisma.chore.update({
     where: { id },
     data: body,
@@ -25,6 +28,9 @@ export const DELETE = withApiHandler(async (_req, ctx) => {
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await ctx.params;
+
+  const existing = await prisma.chore.findFirst({ where: { id, userId } });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const item = await prisma.chore.update({
     where: { id },

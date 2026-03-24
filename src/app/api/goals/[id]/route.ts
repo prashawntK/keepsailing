@@ -7,8 +7,8 @@ export const GET = withApiHandler(async (_req, ctx) => {
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await ctx.params;
-  const goal = await prisma.goal.findUnique({
-    where: { id },
+  const goal = await prisma.goal.findFirst({
+    where: { id, userId },
     include: {
       streaks: true,
       dailyLogs: { orderBy: { date: "desc" }, take: 30 },
@@ -27,16 +27,19 @@ export const PATCH = withApiHandler(async (req: NextRequest, ctx) => {
   const body = await req.json();
   const { steps: stepsInput, ...goalData } = body;
 
+  const existing = await prisma.goal.findFirst({ where: { id, userId } });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   const goal = await prisma.goal.update({ where: { id }, data: goalData });
 
   if (stepsInput !== undefined) {
-    await syncSteps(id, stepsInput as { id?: string; name: string }[]);
+    await syncSteps(id, userId, stepsInput as { id?: string; name: string }[]);
   }
 
   return NextResponse.json(goal);
 });
 
-async function syncSteps(goalId: string, stepsInput: { id?: string; name: string }[]) {
+async function syncSteps(goalId: string, userId: string, stepsInput: { id?: string; name: string }[]) {
   const existing = await prisma.step.findMany({ where: { goalId } });
   const existingIds = new Set(existing.map((s) => s.id));
   const inputIds = new Set(stepsInput.filter((s) => s.id).map((s) => s.id!));
@@ -58,7 +61,7 @@ async function syncSteps(goalId: string, stepsInput: { id?: string; name: string
       });
     } else {
       await prisma.step.create({
-        data: { goalId, name: s.name.trim(), sortOrder: i },
+        data: { goalId, name: s.name.trim(), sortOrder: i, userId },
       });
     }
   }
@@ -69,6 +72,10 @@ export const DELETE = withApiHandler(async (_req, ctx) => {
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await ctx.params;
+
+  const existing = await prisma.goal.findFirst({ where: { id, userId } });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   const goal = await prisma.goal.update({
     where: { id },
     data: { isArchived: true, archivedAt: new Date() },

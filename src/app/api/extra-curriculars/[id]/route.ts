@@ -9,6 +9,9 @@ export const PATCH = withApiHandler(async (req: NextRequest, ctx) => {
   const { id } = await ctx.params;
   const body = await req.json();
 
+  const existing = await prisma.extraCurricular.findFirst({ where: { id, userId } });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   const item = await prisma.extraCurricular.update({
     where: { id },
     data: body,
@@ -22,6 +25,9 @@ export const DELETE = withApiHandler(async (_req, ctx) => {
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await ctx.params;
+
+  const existing = await prisma.extraCurricular.findFirst({ where: { id, userId } });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const item = await prisma.extraCurricular.update({
     where: { id },

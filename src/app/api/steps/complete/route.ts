@@ -10,7 +10,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
 
   const { stepId } = await req.json();
 
-  const step = await prisma.step.findUnique({ where: { id: stepId } });
+  const step = await prisma.step.findFirst({ where: { id: stepId, userId } });
   if (!step) return NextResponse.json({ error: "Step not found" }, { status: 404 });
   if (step.completedAt) return NextResponse.json({ error: "Step already completed" }, { status: 400 });
 
@@ -24,7 +24,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     where: { goalId: step.goalId, completedAt: null },
   });
 
-  const goal = await prisma.goal.findUnique({ where: { id: step.goalId } });
+  const goal = await prisma.goal.findFirst({ where: { id: step.goalId, userId } });
   const log = await prisma.dailyLog.upsert({
     where: { goalId_date: { goalId: step.goalId, date } },
     update: { completed: remainingCount === 0 },

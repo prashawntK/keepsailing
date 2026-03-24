@@ -15,6 +15,14 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
     );
   }
 
+  const owned = await prisma.chore.findMany({
+    where: { id: { in: orderedIds }, userId },
+    select: { id: true },
+  });
+  if (owned.length !== orderedIds.length) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   await prisma.$transaction(
     orderedIds.map((id, index) =>
       prisma.chore.update({ where: { id }, data: { sortOrder: index } })

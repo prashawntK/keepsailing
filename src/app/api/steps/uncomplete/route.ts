@@ -8,7 +8,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
 
   const { stepId } = await req.json();
 
-  const step = await prisma.step.findUnique({ where: { id: stepId } });
+  const step = await prisma.step.findFirst({ where: { id: stepId, userId } });
   if (!step) return NextResponse.json({ error: "Step not found" }, { status: 404 });
 
   const updated = await prisma.step.update({

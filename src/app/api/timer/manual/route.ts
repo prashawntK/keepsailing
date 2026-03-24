@@ -12,7 +12,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   const logDate = date ?? todayString();
   const durationHours = minutes / 60;
 
-  const goal = await prisma.goal.findUnique({ where: { id: goalId } });
+  const goal = await prisma.goal.findFirst({ where: { id: goalId, userId } });
   if (!goal)
     return NextResponse.json({ error: "Goal not found" }, { status: 404 });
 
