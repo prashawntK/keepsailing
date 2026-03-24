@@ -2,7 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Crown, Download, Loader2, Zap } from "lucide-react";
+import { Crown, Loader2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { useToast } from "@/components/providers/ToastProvider";
@@ -82,16 +82,7 @@ export default function SettingsPage() {
     }
   }
 
-  async function handleExport() {
-    const res = await fetch("/api/data/export");
-    if (res.status === 403) {
-      showError("Pro required", "Data export requires a Pro plan.");
-      return;
-    }
-    window.open("/api/data/export", "_blank");
-  }
-
-  const row = "flex items-center justify-between py-3 border-b border-white/[0.06] last:border-0";
+const row = "flex items-center justify-between py-3 border-b border-white/[0.06] last:border-0";
 
   return (
     <div className="space-y-6">
@@ -261,16 +252,7 @@ export default function SettingsPage() {
         )}
       </section>
 
-      {/* Data */}
-      <section className="card p-4">
-        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Data</h2>
-        <Button variant="secondary" onClick={handleExport} className="w-full">
-          <Download size={16} /> Export all data (JSON)
-          {settings?.plan !== "pro" && <span className="ml-auto text-xs text-gray-500">Pro</span>}
-        </Button>
-      </section>
-
-      <p className="text-center text-xs text-gray-600 pb-4">ADHD Scorecard · Built with ❤️</p>
+<p className="text-center text-xs text-gray-600 pb-4">ADHD Scorecard · Built with ❤️</p>
     </div>
   );
 }
