@@ -61,7 +61,6 @@ export function Navigation() {
                     strokeWidth={active ? 2.5 : 1.8}
                     style={active ? { filter: "drop-shadow(0 0 6px var(--color-primary))" } : undefined}
                   />
-                  <span className="text-[10px] font-medium leading-none">{label}</span>
                 </span>
               </Link>
             );
