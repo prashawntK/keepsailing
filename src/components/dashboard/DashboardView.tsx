@@ -7,8 +7,6 @@ import { DailyScoreCard } from "./DailyScoreCard";
 import { GoalGrid } from "./GoalGrid";
 import { TimerStartModal } from "@/components/timer/TimerStartModal";
 import { useTimer } from "@/components/providers/TimerProvider";
-import { MorningView } from "@/components/adhd/MorningView";
-import { ForgivenessBanner } from "@/components/adhd/ForgivenessBanner";
 import { DailyQuote } from "@/components/adhd/DailyQuote";
 import { EnergyTracker } from "@/components/adhd/EnergyTracker";
 import { ExtraCurricularSection } from "./ExtraCurricularSection";
@@ -148,31 +146,6 @@ export function DashboardView({ initialData }: DashboardViewProps) {
         </div>
       </motion.div>
 
-      {/* Forgiveness banner */}
-      <motion.div variants={itemVariants} layout>
-        <ForgivenessBanner yesterdayScore={data.yesterdayScore} />
-      </motion.div>
-
-      {/* Morning kickstart */}
-      <AnimatePresence mode="popLayout">
-        {!hasActivityToday && data.goals.length > 0 && (
-          <motion.div
-            key="morning-kickstart"
-            variants={itemVariants}
-            initial="hidden"
-            animate="show"
-            exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-            layout
-          >
-            <MorningView
-              goals={data.goals}
-              yesterdayScore={data.yesterdayScore}
-              overallStreak={data.overallStreak}
-              onDismiss={refresh}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Daily score ring */}
       <motion.div variants={itemVariants} className="card" layout>
