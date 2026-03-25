@@ -390,64 +390,36 @@ export function GoalForm({ initial, onSubmit, onCancel, submitLabel = "Save Goal
 
       {/* ── SCHEDULE ─────────────────────────────────────────── */}
       <Section icon={Calendar} title="Schedule" step={2}>
-        {/* Goal type */}
-        <div className="flex gap-2 mb-3">
-          {(["timer", "checkbox"] as const).map((t) => {
-            const active = form.goalType === t;
-            return (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setForm((f) => ({ ...f, goalType: t }))}
-                className="flex-1 py-2 rounded-lg border text-sm font-medium transition-all duration-200"
-                style={active ? {
-                  background: `${accentColor}18`,
-                  borderColor: `${accentColor}50`,
-                  color: accentColor,
-                } : {
-                  background: "rgba(255,255,255,0.03)",
-                  borderColor: "rgba(255,255,255,0.07)",
-                  color: "#4B5563",
-                }}
-              >
-                {t === "timer" ? "⏱ Timer" : "✅ Checkbox"}
-              </button>
-            );
-          })}
-        </div>
-
         {/* Daily target */}
-        {form.goalType === "timer" && (
-          <div
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 mb-3 border"
-            style={{ background: `${accentColor}0d`, borderColor: `${accentColor}25` }}
-          >
-            <span className="text-xs text-gray-500 flex-shrink-0">Daily target</span>
-            <div className="flex items-center gap-2 ml-auto">
-              <button
-                type="button"
-                onClick={() => stepTarget(-0.25)}
-                className="w-6 h-6 rounded-md flex items-center justify-center transition-all hover:scale-110 active:scale-95"
-                style={{ background: `${accentColor}25`, color: accentColor }}
-              >
-                <Minus size={11} />
-              </button>
-              <span className="text-base font-bold tabular-nums w-16 text-center" style={{ color: accentColor }}>
-                {form.dailyTarget % 1 === 0
-                  ? `${form.dailyTarget}h`
-                  : `${form.dailyTarget.toFixed(2).replace(/\.?0+$/, "")}h`}
-              </span>
-              <button
-                type="button"
-                onClick={() => stepTarget(0.25)}
-                className="w-6 h-6 rounded-md flex items-center justify-center transition-all hover:scale-110 active:scale-95"
-                style={{ background: `${accentColor}25`, color: accentColor }}
-              >
-                <Plus size={11} />
-              </button>
-            </div>
+        <div
+          className="flex items-center gap-3 rounded-lg px-3 py-2.5 mb-3 border"
+          style={{ background: `${accentColor}0d`, borderColor: `${accentColor}25` }}
+        >
+          <span className="text-xs text-gray-500 flex-shrink-0">Daily target</span>
+          <div className="flex items-center gap-2 ml-auto">
+            <button
+              type="button"
+              onClick={() => stepTarget(-0.25)}
+              className="w-6 h-6 rounded-md flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+              style={{ background: `${accentColor}25`, color: accentColor }}
+            >
+              <Minus size={11} />
+            </button>
+            <span className="text-base font-bold tabular-nums w-16 text-center" style={{ color: accentColor }}>
+              {form.dailyTarget % 1 === 0
+                ? `${form.dailyTarget}h`
+                : `${form.dailyTarget.toFixed(2).replace(/\.?0+$/, "")}h`}
+            </span>
+            <button
+              type="button"
+              onClick={() => stepTarget(0.25)}
+              className="w-6 h-6 rounded-md flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+              style={{ background: `${accentColor}25`, color: accentColor }}
+            >
+              <Plus size={11} />
+            </button>
           </div>
-        )}
+        </div>
 
         {/* Active days */}
         <div>

@@ -54,11 +54,9 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
 
   const rawPct = isBanked
     ? 100
-    : goal.goalType === "checkbox"
-      ? (displayCompleted ? 100 : 0)
-      : goal.dailyTarget > 0
-        ? Math.min(120, (displayTimeSpent / goal.dailyTarget) * 100)
-        : 0;
+    : goal.dailyTarget > 0
+      ? Math.min(120, (displayTimeSpent / goal.dailyTarget) * 100)
+      : 0;
   const pct = Math.min(rawPct, 100);
   const statusBg = getStatusBg(pct);
 
@@ -159,28 +157,14 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
       />
       
       <div className="flex items-center gap-3 relative z-10 pl-1">
-        {/* Emoji + progress ring for timer goals */}
+        {/* Emoji + progress ring */}
         <div className="relative flex-shrink-0">
-          {goal.goalType === "timer" ? (
-            <div className="relative">
-              <ProgressRing percentage={pct} size={44} strokeWidth={4} color={ringColor} />
-              <div className="absolute inset-0 flex items-center justify-center text-lg">
-                {goal.emoji}
-              </div>
+          <div className="relative">
+            <ProgressRing percentage={pct} size={44} strokeWidth={4} color={ringColor} />
+            <div className="absolute inset-0 flex items-center justify-center text-lg">
+              {goal.emoji}
             </div>
-          ) : (
-            <button
-              onClick={handleCheckboxToggle}
-              className={cn(
-                "w-9 h-9 rounded-full border-2 flex items-center justify-center text-base transition-all duration-200",
-                displayCompleted
-                  ? "border-success bg-success/20 scale-105"
-                  : "border-surface-4 bg-surface-2 hover:border-surface-3"
-              )}
-            >
-              {displayCompleted ? <Check size={16} className="text-success" /> : goal.emoji}
-            </button>
-          )}
+          </div>
         </div>
 
         {/* Content */}
@@ -211,8 +195,7 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
             </div>
           )}
 
-          {goal.goalType === "timer" && (
-            <div className="mt-1 flex items-center gap-2 text-sm text-gray-400">
+          <div className="mt-1 flex items-center gap-2 text-sm text-gray-400">
               {isBanked ? (
                 <span className="text-sky-400 font-medium text-xs">
                   ✓ Banked · {formatHours(goal.bankingInfo?.weeklyTotal ?? 0)} / {formatHours(goal.bankingInfo?.weeklyTarget ?? 0)} this week
@@ -229,7 +212,6 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
                 </>
               )}
             </div>
-          )}
 
           {goal.streak.currentStreak > 0 && (
             <div className="mt-1">
@@ -239,8 +221,7 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
         </div>
 
         {/* Timer actions */}
-        {goal.goalType === "timer" && (
-          <div className="flex flex-row gap-1.5 flex-shrink-0">
+        <div className="flex flex-row gap-1.5 flex-shrink-0">
             <button
               onClick={handleTimerClick}
               className={cn(
@@ -315,7 +296,6 @@ export function GoalCard({ goal, onRefresh }: GoalCardProps) {
               </button>
             )}
           </div>
-        )}
       </div>
 
 
