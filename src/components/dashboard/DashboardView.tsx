@@ -61,9 +61,13 @@ export function DashboardView({ initialData }: DashboardViewProps) {
       startTransition(() => {
         setData(next);
         setLoading(false);
-        // Set onboarding state from dashboard response (avoids a separate /api/user fetch)
+        // Set onboarding state from dashboard response — never re-show once dismissed
         if (next.user !== undefined) {
-          setShowOnboarding(!next.user?.onboardingCompleted);
+          setShowOnboarding((prev) => {
+            // If already closed (false), never re-open from a stale server response
+            if (prev === false) return false;
+            return !next.user?.onboardingCompleted;
+          });
         }
         // Only fire confetti when count genuinely increases AFTER the first load.
         // prevCompletedRef starts as null so the initial page load never triggers it.

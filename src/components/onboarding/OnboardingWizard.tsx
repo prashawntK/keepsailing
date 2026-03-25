@@ -160,12 +160,14 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
   }
 
   async function handleFinish() {
+    // Mark complete first, then close — prevents re-show on dashboard refresh
     await fetch("/api/user", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ onboardingCompleted: true }),
     });
     setVisible(false);
+    // Call onComplete after animation — dashboard refresh will now read onboardingCompleted: true
     setTimeout(onComplete, 300);
   }
 
