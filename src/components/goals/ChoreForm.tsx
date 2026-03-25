@@ -257,7 +257,7 @@ export function ChoreForm({ initial, onSubmit, onCancel, submitLabel = "Save" }:
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim() || !deadline) return;
+    if (!name.trim() || !deadline || !description.trim()) return;
     setLoading(true);
     try {
       const parsed = parseInt(minutes, 10);
@@ -377,15 +377,16 @@ export function ChoreForm({ initial, onSubmit, onCancel, submitLabel = "Save" }:
         </Section>
 
         {/* ── 4. Context ── */}
-        <Section icon={AlignLeft} title="Context" step={4}>
+        <Section icon={AlignLeft} title="Purpose" step={4}>
           <label className="block text-[10px] text-gray-500 uppercase tracking-wider font-medium mb-2">
-            Notes <span className="text-gray-600 normal-case">(optional)</span>
+            Why does this matter? <span className="text-red-400">*</span>
           </label>
           <textarea
+            required
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
-            placeholder="Any details or notes about this chore..."
+            placeholder="e.g. A clean space helps me focus and feel in control..."
             className="w-full bg-white/4 border border-white/8 rounded-lg px-3 py-2 text-sm text-gray-100 outline-none resize-none transition-all duration-200 placeholder-gray-600 hover:border-white/14"
             onFocus={(e) => { e.currentTarget.style.boxShadow = `0 0 0 1.5px ${ACCENT}`; }}
             onBlur={(e)  => { e.currentTarget.style.boxShadow = "none"; }}
@@ -395,7 +396,7 @@ export function ChoreForm({ initial, onSubmit, onCancel, submitLabel = "Save" }:
         {/* Actions */}
         <div className="flex gap-2 justify-end pt-1">
           <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
-          <Button type="submit" disabled={!name.trim() || !deadline || loading}>
+          <Button type="submit" disabled={!name.trim() || !deadline || !description.trim() || loading}>
             {loading ? "Saving..." : submitLabel}
           </Button>
         </div>

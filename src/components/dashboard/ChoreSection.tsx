@@ -194,11 +194,15 @@ export function ChoreSection({ chores, onRefresh }: Props) {
                     }`}>
                       {chore.name}
                     </p>
-                    {isCompleting && (
+                    {isCompleting ? (
                       <p className="text-[11px] text-success/80 mt-0.5 leading-tight font-medium">
                         Done! Great job 🎉
                       </p>
-                    )}
+                    ) : chore.description ? (
+                      <p className="text-[11px] text-gray-500 italic mt-0.5 leading-tight line-clamp-1">
+                        {chore.description}
+                      </p>
+                    ) : null}
                     {chore.totalMinutesSpent > 0 && !isCompleting && (
                       <p className="text-[10px] text-gray-600 mt-1">
                         {timeLabel(chore.totalMinutesSpent)} spent
