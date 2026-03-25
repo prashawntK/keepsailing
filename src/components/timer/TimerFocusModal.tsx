@@ -17,14 +17,10 @@ interface TimerFocusModalProps {
 }
 
 /* ── Atom rings ── */
-// 3 orbital planes:
-//   Ring 1 — equatorial (horizontal flat ellipse)
-//   Ring 2 — polar (tall vertical ellipse, slightly tilted for perspective)
-//   Ring 3 — diagonal (45° between the two)
 const ATOM_RINGS = [
-  { id: 0, rx: 84, ry: 22, groupRotate: 0,  dur: 3.4, sweep: 1 as const },
-  { id: 1, rx: 26, ry: 84, groupRotate: 10, dur: 5.2, sweep: 0 as const },
-  { id: 2, rx: 68, ry: 38, groupRotate: 50, dur: 4.1, sweep: 1 as const },
+  { id: 0, rx: 84, ry: 22, groupRotate: 0,  dur: 3.4, sweep: 1 as const, opacity: 1.0 },
+  { id: 1, rx: 26, ry: 84, groupRotate: 10, dur: 5.2, sweep: 0 as const, opacity: 0.85 },
+  { id: 2, rx: 68, ry: 38, groupRotate: 50, dur: 4.1, sweep: 1 as const, opacity: 0.7 },
 ];
 
 function ellipsePath(rx: number, ry: number, sweep: 0 | 1) {
@@ -34,39 +30,56 @@ function ellipsePath(rx: number, ry: number, sweep: 0 | 1) {
 function AtomAnimation({ color, isLight }: { color: string; isLight: boolean }) {
   return (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-      <svg width="200" height="200" viewBox="-100 -100 200 200" style={{ overflow: "visible" }}>
+      <svg width="220" height="220" viewBox="-110 -110 220 220" style={{ overflow: "visible" }}>
         <defs>
+          {/* Orb glow — large blur for halo effect */}
           {ATOM_RINGS.map(r => (
-            <filter key={r.id} id={`atom-glow-${r.id}`} x="-120%" y="-120%" width="340%" height="340%">
-              <feGaussianBlur stdDeviation="3.5" result="blur" />
+            <filter key={r.id} id={`atom-glow-${r.id}`} x="-200%" y="-200%" width="500%" height="500%">
+              <feGaussianBlur stdDeviation="5" result="blur" />
               <feMerge>
+                <feMergeNode in="blur" />
                 <feMergeNode in="blur" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
           ))}
-          <radialGradient id="nucleus-grad">
-            <stop offset="0%" stopColor={color} stopOpacity="0.55" />
+          {/* Ring track glow */}
+          <filter id="ring-glow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="2" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          {/* Nucleus radial glow */}
+          <radialGradient id="nucleus-grad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor={color} stopOpacity="0.5" />
+            <stop offset="60%" stopColor={color} stopOpacity="0.15" />
             <stop offset="100%" stopColor={color} stopOpacity="0" />
           </radialGradient>
         </defs>
 
-        {/* Nucleus ambient glow */}
-        <circle cx="0" cy="0" r="32" fill="url(#nucleus-grad)" />
+        {/* Nucleus glow behind time */}
+        <circle cx="0" cy="0" r="40" fill="url(#nucleus-grad)" />
+
+        {/* Nucleus ring — pulsing circle */}
+        <circle cx="0" cy="0" r="28" fill="none" stroke={color} strokeWidth="1.5" strokeOpacity="0.4">
+          <animate attributeName="r" values="26;30;26" dur="2.4s" repeatCount="indefinite" />
+          <animate attributeName="stroke-opacity" values="0.45;0.2;0.45" dur="2.4s" repeatCount="indefinite" />
+        </circle>
 
         {/* The 3 orbital rings + orbs */}
         {ATOM_RINGS.map(ring => (
-          <g key={ring.id} transform={`rotate(${ring.groupRotate})`}>
+          <g key={ring.id} transform={`rotate(${ring.groupRotate})`} opacity={ring.opacity}>
+            {/* Glowing ring track */}
             <ellipse
-              cx="0" cy="0"
-              rx={ring.rx} ry={ring.ry}
-              fill="none"
-              stroke={color}
-              strokeWidth="1.2"
-              strokeOpacity={isLight ? 0.3 : 0.22}
-              strokeDasharray="4 3"
+              cx="0" cy="0" rx={ring.rx} ry={ring.ry}
+              fill="none" stroke={color} strokeWidth="1.5"
+              strokeOpacity={isLight ? 0.35 : 0.28}
+              filter="url(#ring-glow)"
             />
-            <circle r="5.5" fill={color} filter={`url(#atom-glow-${ring.id})`}>
+            {/* Orb */}
+            <circle r="7" fill={color} opacity="0.9" filter={`url(#atom-glow-${ring.id})`}>
               <animateMotion
                 dur={`${ring.dur}s`}
                 repeatCount="indefinite"
