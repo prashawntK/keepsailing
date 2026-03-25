@@ -32,7 +32,6 @@ function AtomAnimation({ color, isLight }: { color: string; isLight: boolean }) 
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
       <svg width="340" height="340" viewBox="-170 -170 340 340" style={{ overflow: "visible" }}>
         <defs>
-          {/* Orb glow — large blur for halo effect */}
           {ATOM_RINGS.map(r => (
             <filter key={r.id} id={`atom-glow-${r.id}`} x="-200%" y="-200%" width="500%" height="500%">
               <feGaussianBlur stdDeviation="5" result="blur" />
@@ -43,7 +42,6 @@ function AtomAnimation({ color, isLight }: { color: string; isLight: boolean }) 
               </feMerge>
             </filter>
           ))}
-          {/* Ring track glow */}
           <filter id="ring-glow" x="-40%" y="-40%" width="180%" height="180%">
             <feGaussianBlur stdDeviation="2" result="blur" />
             <feMerge>
@@ -51,7 +49,6 @@ function AtomAnimation({ color, isLight }: { color: string; isLight: boolean }) 
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
-          {/* Nucleus radial glow */}
           <radialGradient id="nucleus-grad" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor={color} stopOpacity="0.5" />
             <stop offset="60%" stopColor={color} stopOpacity="0.15" />
@@ -59,26 +56,21 @@ function AtomAnimation({ color, isLight }: { color: string; isLight: boolean }) 
           </radialGradient>
         </defs>
 
-        {/* Nucleus glow behind time */}
         <circle cx="0" cy="0" r="32" fill="url(#nucleus-grad)" />
 
-        {/* Nucleus ring — pulsing circle */}
         <circle cx="0" cy="0" r="20" fill="none" stroke={color} strokeWidth="1.2" strokeOpacity="0.4">
           <animate attributeName="r" values="19;22;19" dur="2.4s" repeatCount="indefinite" />
           <animate attributeName="stroke-opacity" values="0.4;0.15;0.4" dur="2.4s" repeatCount="indefinite" />
         </circle>
 
-        {/* The 3 orbital rings + orbs */}
         {ATOM_RINGS.map(ring => (
           <g key={ring.id} transform={`rotate(${ring.groupRotate})`} opacity={ring.opacity}>
-            {/* Glowing ring track */}
             <ellipse
               cx="0" cy="0" rx={ring.rx} ry={ring.ry}
               fill="none" stroke={color} strokeWidth="1.5"
               strokeOpacity={isLight ? 0.35 : 0.28}
               filter="url(#ring-glow)"
             />
-            {/* Orb */}
             <circle r="7" fill={color} opacity="0.9" filter={`url(#atom-glow-${ring.id})`}>
               <animateMotion
                 dur={`${ring.dur}s`}
@@ -214,6 +206,24 @@ export function TimerFocusModal({
 
   const milestone = duration ? getMilestone(pct) : null;
 
+  // Ambient wash color — indigo → amber → green with progress
+  const washColor = useMemo(() => {
+    if (isComplete) return "rgba(34,197,94,0.22)";
+    if (!duration) return "rgba(99,102,241,0.12)";
+    if (pct < 50) {
+      const t = pct / 50;
+      const r = Math.round(99 + (245 - 99) * t);
+      const g = Math.round(102 + (158 - 102) * t);
+      const b = Math.round(241 + (11 - 241) * t);
+      return `rgba(${r},${g},${b},${0.1 + t * 0.08})`;
+    }
+    const t = (pct - 50) / 50;
+    const r = Math.round(245 + (34 - 245) * t);
+    const g = Math.round(158 + (197 - 158) * t);
+    const b = Math.round(11 + (94 - 11) * t);
+    return `rgba(${r},${g},${b},${0.18 + t * 0.04})`;
+  }, [pct, duration, isComplete]);
+
   // Track milestone changes for bounce animation
   const currentMilestoneLevel =
     pct >= 100 ? 4 : pct >= 75 ? 3 : pct >= 50 ? 2 : pct >= 25 ? 1 : 0;
@@ -253,6 +263,15 @@ export function TimerFocusModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+          />
+
+          {/* Ambient color wash — full-screen radial glow that shifts with progress */}
+          <motion.div
+            className="absolute inset-0 pointer-events-none"
+            animate={{
+              background: `radial-gradient(ellipse 70% 60% at 50% 50%, ${washColor} 0%, transparent 100%)`,
+            }}
+            transition={{ duration: 2, ease: "easeInOut" }}
           />
 
           {/* Card + buttons stacked */}
