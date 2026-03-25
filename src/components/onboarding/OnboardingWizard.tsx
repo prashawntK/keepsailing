@@ -101,7 +101,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
           emoji: goalEmoji,
           category: "Personal",
           goalType: "timer",
-          dailyTarget: goalDailyTarget,
+          dailyTarget: goalDailyTarget / 60, // convert minutes → hours
           priority: "should",
         }),
       });
