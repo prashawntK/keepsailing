@@ -419,6 +419,24 @@ body {
   animation: timer-breathe 2.5s ease-in-out infinite;
 }
 
+/* Timer complete breathing glow (green) */
+@keyframes timer-breathe-complete {
+  0%, 100% { box-shadow: 0 0 12px 2px rgba(34,197,94,0.2), var(--glass-shadow); }
+  50%      { box-shadow: 0 0 22px 5px rgba(34,197,94,0.35), var(--glass-shadow); }
+}
+.timer-breathing-complete {
+  animation: timer-breathe-complete 2.5s ease-in-out infinite;
+}
+
+/* Focus modal ring glow */
+@keyframes ring-glow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 6px currentColor); }
+  50%      { filter: drop-shadow(0 0 14px currentColor); }
+}
+.ring-glow-pulse {
+  animation: ring-glow-pulse 2s ease-in-out infinite;
+}
+
 /* Ambient Background Blobs */
 @keyframes ambient-drift {
   0% { transform: translate(0, 0) scale(1) rotate(0deg); }
