@@ -75,7 +75,7 @@ export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
   };
 
   return (
-    <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 md:bottom-6">
+    <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-40 md:bottom-28">
       <div className="relative" onMouseEnter={onEnter} onMouseLeave={onLeave}>
         {/* Floating icon buttons — pop up above on hover */}
         <div
