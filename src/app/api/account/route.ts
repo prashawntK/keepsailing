@@ -1,19 +1,21 @@
 import { NextResponse } from "next/server";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { prisma } from "@/lib/db";
 import { getAuthUserId, withApiHandler } from "@/lib/api";
-import { createClient } from "@/lib/supabase/server";
 
 export const DELETE = withApiHandler(async () => {
   const userId = await getAuthUserId();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  // Delete the User record — all related records cascade via onDelete: Cascade
-  // If the cascade fails for any reason, we catch below
+  // Delete all user data — cascades to all related tables
   await prisma.user.delete({ where: { id: userId } });
 
-  // Sign the user out of Supabase so their session is invalidated server-side
-  const supabase = await createClient();
-  await supabase.auth.signOut();
+  // Permanently delete the Supabase Auth user so they can't log back in
+  const adminClient = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+  await adminClient.auth.admin.deleteUser(userId);
 
   return NextResponse.json({ success: true });
 });
