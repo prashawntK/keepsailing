@@ -16,6 +16,71 @@ interface TimerFocusModalProps {
   goals?: GoalWithProgress[];
 }
 
+/* ── Atom rings ── */
+// 3 orbital planes:
+//   Ring 1 — equatorial (horizontal flat ellipse)
+//   Ring 2 — polar (tall vertical ellipse, slightly tilted for perspective)
+//   Ring 3 — diagonal (45° between the two)
+const ATOM_RINGS = [
+  { id: 0, rx: 84, ry: 22, groupRotate: 0,  dur: 3.4, sweep: 1 as const },
+  { id: 1, rx: 26, ry: 84, groupRotate: 10, dur: 5.2, sweep: 0 as const },
+  { id: 2, rx: 68, ry: 38, groupRotate: 50, dur: 4.1, sweep: 1 as const },
+];
+
+function ellipsePath(rx: number, ry: number, sweep: 0 | 1) {
+  return `M ${rx} 0 A ${rx} ${ry} 0 1 ${sweep} -${rx} 0 A ${rx} ${ry} 0 1 ${sweep} ${rx} 0`;
+}
+
+function AtomAnimation({ color, isLight }: { color: string; isLight: boolean }) {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+      <svg width="200" height="200" viewBox="-100 -100 200 200" style={{ overflow: "visible" }}>
+        <defs>
+          {ATOM_RINGS.map(r => (
+            <filter key={r.id} id={`atom-glow-${r.id}`} x="-120%" y="-120%" width="340%" height="340%">
+              <feGaussianBlur stdDeviation="3.5" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          ))}
+          <radialGradient id="nucleus-grad">
+            <stop offset="0%" stopColor={color} stopOpacity="0.55" />
+            <stop offset="100%" stopColor={color} stopOpacity="0" />
+          </radialGradient>
+        </defs>
+
+        {/* Nucleus ambient glow */}
+        <circle cx="0" cy="0" r="32" fill="url(#nucleus-grad)" />
+
+        {/* The 3 orbital rings + orbs */}
+        {ATOM_RINGS.map(ring => (
+          <g key={ring.id} transform={`rotate(${ring.groupRotate})`}>
+            <ellipse
+              cx="0" cy="0"
+              rx={ring.rx} ry={ring.ry}
+              fill="none"
+              stroke={color}
+              strokeWidth="1.2"
+              strokeOpacity={isLight ? 0.3 : 0.22}
+              strokeDasharray="4 3"
+            />
+            <circle r="5.5" fill={color} filter={`url(#atom-glow-${ring.id})`}>
+              <animateMotion
+                dur={`${ring.dur}s`}
+                repeatCount="indefinite"
+                calcMode="linear"
+                path={ellipsePath(ring.rx, ring.ry, ring.sweep)}
+              />
+            </circle>
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
 /* ── Floating particles ── */
 const PARTICLES = Array.from({ length: 7 }, (_, i) => ({
   id: i,
@@ -236,106 +301,39 @@ export function TimerFocusModal({
                 </span>
               )}
 
-              {/* Central animation area */}
-              <div className="relative flex items-center justify-center my-6 w-[200px] h-[200px]">
-                {/* Floating particles */}
-                {PARTICLES.map((p) => (
-                  <motion.div
-                    key={p.id}
-                    className="absolute rounded-full"
-                    style={{
-                      width: p.size,
-                      height: p.size,
-                      background: resolvedColor,
-                      opacity: p.opacity,
-                      top: "50%",
-                      left: "50%",
-                    }}
-                    animate={{
-                      x: p.xPath,
-                      y: p.yPath,
-                    }}
-                    transition={{
-                      duration: p.duration,
-                      repeat: Infinity,
-                      repeatType: "mirror",
-                      ease: "easeInOut",
-                      delay: p.delay,
-                    }}
-                  />
-                ))}
+              {/* Central animation area — atom rings orbit around the time nucleus */}
+              <div className="relative flex items-center justify-center my-2 w-[220px] h-[220px]">
+                <AtomAnimation color={resolvedColor} isLight={isLight} />
 
-                {/* Progress ring or breathing circle */}
-                {duration ? (
-                  <>
-                    <ProgressRingLarge
-                      percentage={pct}
-                      color={resolvedColor}
-                    />
-
-                    {/* Completion burst */}
-                    {isComplete && (
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div
-                          className="absolute w-[200px] h-[200px] rounded-full orb-ring-1"
-                          style={{
-                            border: `2px solid ${resolvedColor}`,
-                          }}
-                        />
-                        <div
-                          className="absolute w-[200px] h-[200px] rounded-full orb-ring-2"
-                          style={{
-                            border: `2px solid ${resolvedColor}`,
-                          }}
-                        />
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  /* Open-ended: breathing circle */
-                  <motion.div
-                    className="w-[160px] h-[160px] rounded-full"
-                    style={{
-                      background: `radial-gradient(circle, ${resolvedColor}22 0%, ${resolvedColor}08 60%, transparent 70%)`,
-                      border: `1.5px solid ${resolvedColor}33`,
-                    }}
-                    animate={{
-                      scale: [1, 1.08, 1],
-                      opacity: [0.6, 0.85, 0.6],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                  />
-                )}
-
-                {/* Time display overlay */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                {/* Time as nucleus — sits in the center of the atom */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                   <AnimatePresence mode="popLayout">
                     <motion.span
                       key={displayTime}
-                      className="text-5xl font-mono font-bold tabular-nums"
+                      className="text-4xl font-mono font-bold tabular-nums"
                       style={{ color: resolvedColor }}
-                      initial={{ y: 8, opacity: 0 }}
+                      initial={{ y: 4, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: -8, opacity: 0 }}
+                      exit={{ y: -4, opacity: 0 }}
                       transition={{ duration: 0.15 }}
                     >
                       {displayTime}
                     </motion.span>
                   </AnimatePresence>
                   {duration && (
-                    <span
-                      className={`text-xs mt-1 font-mono ${
-                        isLight ? "text-gray-400" : "text-gray-600"
-                      }`}
-                    >
+                    <span className={`text-[11px] mt-0.5 font-mono ${isLight ? "text-gray-400" : "text-gray-500"}`}>
                       / {formatTimerDisplay(duration)}
                     </span>
                   )}
                 </div>
+
+                {/* Completion burst */}
+                {isComplete && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="absolute w-[220px] h-[220px] rounded-full orb-ring-1" style={{ border: `2px solid ${resolvedColor}` }} />
+                    <div className="absolute w-[220px] h-[220px] rounded-full orb-ring-2" style={{ border: `2px solid ${resolvedColor}` }} />
+                  </div>
+                )}
               </div>
 
               {/* Milestone text */}
