@@ -12,11 +12,20 @@ export const DELETE = withApiHandler(async () => {
   await prisma.user.deleteMany({ where: { id: userId } });
 
   // Permanently delete the Supabase Auth user so they can't log back in
-  const adminClient = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-  await adminClient.auth.admin.deleteUser(userId);
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (serviceKey) {
+    const adminClient = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      serviceKey
+    );
+    await adminClient.auth.admin.deleteUser(userId);
+  } else {
+    // Key not configured — sign out at minimum so session is invalidated
+    console.error("[account/delete] SUPABASE_SERVICE_ROLE_KEY not set — auth user not deleted");
+    const { createClient } = await import("@/lib/supabase/server");
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+  }
 
   return NextResponse.json({ success: true });
 });
