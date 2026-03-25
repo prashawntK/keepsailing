@@ -146,7 +146,7 @@ export function DashboardView({ initialData }: DashboardViewProps) {
           {!timerState.isRunning && (
             <button
               onClick={() => {
-                startUniversalTimer({ type: "goal", id: "free", name: "Focus", emoji: "⏱️", durationMinutes: null });
+                startUniversalTimer({ type: "goal", id: "free", name: "", emoji: "⏱️", durationMinutes: null });
                 refresh();
               }}
               className="p-2.5 rounded-xl bg-primary/15 text-primary hover:bg-primary/25 transition-all"

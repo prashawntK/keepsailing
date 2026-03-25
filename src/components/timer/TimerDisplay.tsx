@@ -127,9 +127,11 @@ export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
               )}
             </span>
 
-            <span className={`text-xs max-w-[80px] truncate hidden sm:block ${isLight ? "text-gray-500" : "text-gray-500"}`}>
-              {timerName}
-            </span>
+            {timerName && (
+              <span className={`text-xs max-w-[80px] truncate hidden sm:block ${isLight ? "text-gray-500" : "text-gray-500"}`}>
+                {timerName}
+              </span>
+            )}
           </div>
         </div>
       </div>
