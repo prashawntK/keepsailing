@@ -206,23 +206,30 @@ export function TimerFocusModal({
 
   const milestone = duration ? getMilestone(pct) : null;
 
-  // Ambient wash color — indigo → amber → green with progress
-  const washColor = useMemo(() => {
-    if (isComplete) return "rgba(34,197,94,0.22)";
-    if (!duration) return "rgba(99,102,241,0.12)";
+  // Ambient blob colors — indigo → amber → green with progress
+  const [washR, washG, washB, washA] = useMemo((): [number, number, number, number] => {
+    if (isComplete) return [34, 197, 94, 0.22];
+    if (!duration) return [99, 102, 241, 0.13];
     if (pct < 50) {
       const t = pct / 50;
-      const r = Math.round(99 + (245 - 99) * t);
-      const g = Math.round(102 + (158 - 102) * t);
-      const b = Math.round(241 + (11 - 241) * t);
-      return `rgba(${r},${g},${b},${0.1 + t * 0.08})`;
+      return [
+        Math.round(99 + (245 - 99) * t),
+        Math.round(102 + (158 - 102) * t),
+        Math.round(241 + (11 - 241) * t),
+        0.1 + t * 0.08,
+      ];
     }
     const t = (pct - 50) / 50;
-    const r = Math.round(245 + (34 - 245) * t);
-    const g = Math.round(158 + (197 - 158) * t);
-    const b = Math.round(11 + (94 - 11) * t);
-    return `rgba(${r},${g},${b},${0.18 + t * 0.04})`;
+    return [
+      Math.round(245 + (34 - 245) * t),
+      Math.round(158 + (197 - 158) * t),
+      Math.round(11 + (94 - 11) * t),
+      0.18 + t * 0.04,
+    ];
   }, [pct, duration, isComplete]);
+
+  const washColor = `rgba(${washR},${washG},${washB},${washA})`;
+  const washColorDim = `rgba(${washR},${washG},${washB},${washA * 0.5})`;
 
   // Track milestone changes for bounce animation
   const currentMilestoneLevel =
@@ -265,13 +272,16 @@ export function TimerFocusModal({
             exit={{ opacity: 0 }}
           />
 
-          {/* Ambient color wash — full-screen radial glow that shifts with progress */}
-          <motion.div
-            className="absolute inset-0 pointer-events-none"
-            animate={{
-              background: `radial-gradient(ellipse 70% 60% at 50% 50%, ${washColor} 0%, transparent 100%)`,
+          {/* Ambient blobs — offset spots for depth instead of uniform wash */}
+          <div
+            className="absolute inset-0 pointer-events-none transition-all duration-[2000ms] ease-in-out"
+            style={{
+              background: `
+                radial-gradient(ellipse 45% 40% at 18% 22%, ${washColor} 0%, transparent 100%),
+                radial-gradient(ellipse 38% 32% at 82% 72%, ${washColor} 0%, transparent 100%),
+                radial-gradient(ellipse 28% 22% at 72% 18%, ${washColorDim} 0%, transparent 100%)
+              `,
             }}
-            transition={{ duration: 2, ease: "easeInOut" }}
           />
 
           {/* Card + buttons stacked */}
