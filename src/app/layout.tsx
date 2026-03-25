@@ -14,13 +14,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "keepsailing",
+  title: "Keep Sailing",
   description: "Your daily accountability companion",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "keepsailing",
+    title: "Keep Sailing",
   },
   icons: {
     icon: "/icons/icon-192.png",

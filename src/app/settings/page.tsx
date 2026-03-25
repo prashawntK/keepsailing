@@ -288,7 +288,7 @@ const row = "flex items-center justify-between py-3 border-b border-white/[0.06]
         </div>
       </section>
 
-      <p className="text-center text-xs text-gray-600 pb-4">keepsailing · Built with ❤️</p>
+      <p className="text-center text-xs text-gray-600 pb-4">Keep Sailing · Built with ❤️</p>
 
       {/* Delete confirmation modal */}
       {showDeleteConfirm && (

@@ -58,7 +58,7 @@ function LoginForm() {
       <div className="text-center space-y-1">
         <div className="text-4xl mb-3">🧠</div>
         <h1 className="text-2xl font-bold text-gray-50">Welcome back</h1>
-        <p className="text-sm text-gray-400">Sign in to keepsailing</p>
+        <p className="text-sm text-gray-400">Sign in to Keep Sailing</p>
       </div>
 
       {/* Google sign-in */}
