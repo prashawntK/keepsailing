@@ -8,7 +8,8 @@ export const DELETE = withApiHandler(async () => {
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // Delete all user data — cascades to all related tables
-  await prisma.user.delete({ where: { id: userId } });
+  // Use deleteMany so it doesn't throw if the Prisma row doesn't exist yet
+  await prisma.user.deleteMany({ where: { id: userId } });
 
   // Permanently delete the Supabase Auth user so they can't log back in
   const adminClient = createAdminClient(
