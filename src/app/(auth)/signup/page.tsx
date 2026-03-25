@@ -19,6 +19,10 @@ export default function SignupPage() {
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
+    if (!name.trim()) {
+      setError("Please enter your name.");
+      return;
+    }
     setLoading(true);
     setError(null);
 
@@ -73,11 +77,12 @@ export default function SignupPage() {
           <input
             id="name"
             type="text"
+            required
             autoComplete="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full px-4 py-2.5 rounded-xl bg-surface-2 border border-white/[0.08] text-gray-50 placeholder-gray-500 focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/30 transition-colors"
-            placeholder="Your name (optional)"
+            placeholder="Your name"
           />
         </div>
 
