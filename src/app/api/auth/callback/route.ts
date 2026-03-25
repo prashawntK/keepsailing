@@ -14,15 +14,20 @@ export async function GET(request: Request) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error && data.user) {
       // Ensure Prisma User record exists — create on first login
-      await prisma.user.upsert({
-        where: { id: data.user.id },
-        update: {},
-        create: {
-          id: data.user.id,
-          email: data.user.email ?? "",
-          name: (data.user.user_metadata?.name as string | undefined) ?? null,
-        },
-      });
+      try {
+        await prisma.user.upsert({
+          where: { id: data.user.id },
+          update: {},
+          create: {
+            id: data.user.id,
+            email: data.user.email ?? "",
+            name: (data.user.user_metadata?.name as string | undefined) ?? null,
+          },
+        });
+      } catch (e) {
+        // Non-fatal — user is authenticated, just log and continue
+        console.error("[auth/callback] Failed to upsert Prisma user:", e);
+      }
       return NextResponse.redirect(`${origin}${next}`);
     }
   }
