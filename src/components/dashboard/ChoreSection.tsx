@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import type { ChoreWithStatus } from "@/types";
-import { getPersuasiveMessage } from "@/lib/chore-messages";
 
 interface Props {
   chores: ChoreWithStatus[];
@@ -127,14 +126,6 @@ export function ChoreSection({ chores, onRefresh }: Props) {
           const isExiting = exiting.has(chore.id);
           const rgb = isCompleting ? SUCCESS_RGB : SEVERITY_COLOR[chore.deadlineSeverity];
 
-          const message = getPersuasiveMessage({
-            daysUntilDeadline: chore.daysUntilDeadline,
-            estimatedMinutes: chore.estimatedMinutes,
-            totalMinutesSpent: chore.totalMinutesSpent,
-            completedToday: checked,
-            choreId: chore.id,
-          });
-
           return (
             // Height-collapse wrapper
             <div
@@ -203,11 +194,6 @@ export function ChoreSection({ chores, onRefresh }: Props) {
                     }`}>
                       {chore.name}
                     </p>
-                    {!checked && !isCompleting && message && (
-                      <p className="text-[11px] text-gray-500 italic mt-0.5 leading-tight">
-                        {message}
-                      </p>
-                    )}
                     {isCompleting && (
                       <p className="text-[11px] text-success/80 mt-0.5 leading-tight font-medium">
                         Done! Great job 🎉

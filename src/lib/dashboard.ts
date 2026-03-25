@@ -21,7 +21,7 @@ export async function assembleDashboardData(date?: string, userId?: string | nul
 
   const weekDates = getWeekDatesRange(d);
 
-  const [goals, overallStreakRecord, yesterdayScore, pointsAggregate, ecItems, ecTodayLogs, choreItems, weeklyLogs] =
+  const [goals, overallStreakRecord, yesterdayScore, pointsAggregate, ecItems, ecTodayLogs, choreItems, weeklyLogs, userRecord] =
     await Promise.all([
       prisma.goal.findMany({
         where: { isArchived: false, ...(userId ? { userId } : {}) },
@@ -69,6 +69,9 @@ export async function assembleDashboardData(date?: string, userId?: string | nul
         where: { date: { in: weekDates }, ...(userId ? { userId } : {}) },
         select: { goalId: true, date: true, timeSpent: true },
       }),
+      userId
+        ? prisma.user.findUnique({ where: { id: userId }, select: { name: true, onboardingCompleted: true } })
+        : null,
     ]);
 
   // Group weekly logs by goalId for banking calculations
@@ -295,5 +298,6 @@ export async function assembleDashboardData(date?: string, userId?: string | nul
     yesterdayScore: yesterdayScore?.score ?? null,
     totalPoints: pointsAggregate._sum?.amount ?? 0,
     date: d,
+    user: userRecord ? { name: userRecord.name, onboardingCompleted: userRecord.onboardingCompleted } : null,
   };
 }

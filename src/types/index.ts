@@ -128,6 +128,7 @@ export interface DashboardData {
   yesterdayScore: number | null;
   totalPoints: number;
   date: string;
+  user?: { name: string | null; onboardingCompleted: boolean } | null;
 }
 
 export type TimerTargetType = "goal" | "ec" | "chore";

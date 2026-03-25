@@ -61,6 +61,10 @@ export function DashboardView({ initialData }: DashboardViewProps) {
       startTransition(() => {
         setData(next);
         setLoading(false);
+        // Set onboarding state from dashboard response (avoids a separate /api/user fetch)
+        if (next.user !== undefined) {
+          setShowOnboarding(!next.user?.onboardingCompleted);
+        }
         // Only fire confetti when count genuinely increases AFTER the first load.
         // prevCompletedRef starts as null so the initial page load never triggers it.
         if (prevCompletedRef.current !== null && next.dailyScore.goalsCompleted > prevCompletedRef.current) {
@@ -79,20 +83,8 @@ export function DashboardView({ initialData }: DashboardViewProps) {
   // Initial load — fetch with correct local date on mount
   useEffect(() => { refresh(); }, [refresh]);
 
-  // Check if onboarding is needed
-  useEffect(() => {
-    fetch("/api/user")
-      .then((res) => res.ok ? res.json() : null)
-      .then((data) => {
-        if (data) {
-          setShowOnboarding(!data.onboardingCompleted);
-        }
-      })
-      .catch(() => {
-        // If we can't fetch, don't block the dashboard
-        setShowOnboarding(false);
-      });
-  }, []);
+  // Onboarding state is set inside the refresh() callback via data.user
+  // No separate /api/user fetch needed — eliminates an extra round-trip on load
 
   // Request notification permission on mount (non-intrusive) and check chore deadlines
   const notifiedRef = useRef(false);
