@@ -2,7 +2,8 @@
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Crown, Loader2, Zap } from "lucide-react";
+import { Crown, Loader2, LogOut, Zap } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { useToast } from "@/components/providers/ToastProvider";
@@ -83,6 +84,12 @@ export default function SettingsPage() {
     } finally {
       setBillingLoading(false);
     }
+  }
+
+  async function handleLogout() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
   }
 
   async function handleDeleteAccount() {
@@ -269,6 +276,23 @@ const row = "flex items-center justify-between py-3 border-b border-white/[0.06]
             )}
           </div>
         )}
+      </section>
+
+      {/* Logout */}
+      <section className="card p-4">
+        <div className={row}>
+          <div>
+            <p className="text-sm text-gray-200">Sign out</p>
+            <p className="text-xs text-gray-500 mt-0.5">Sign out of your account on this device</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-gray-300 text-xs font-semibold hover:bg-white/10 transition-colors"
+          >
+            <LogOut size={13} />
+            Sign out
+          </button>
+        </div>
       </section>
 
       {/* Danger Zone */}
