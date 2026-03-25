@@ -56,7 +56,7 @@ function LoginForm() {
     <div className="glass-panel rounded-2xl p-8 space-y-6">
       {/* Header */}
       <div className="text-center space-y-1">
-        <div className="text-4xl mb-3">🧠</div>
+        <img src="/logo.svg" alt="Keep Sailing" className="w-16 h-16 mx-auto mb-1" />
         <h1 className="text-2xl font-bold text-gray-50">Welcome back</h1>
         <p className="text-sm text-gray-400">Sign in to Keep Sailing</p>
       </div>

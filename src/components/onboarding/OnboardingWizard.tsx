@@ -333,7 +333,7 @@ function Step1Welcome({
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
-        <div className="text-5xl">👋</div>
+        <img src="/logo.svg" alt="Keep Sailing" className="w-14 h-14 mx-auto mb-1" />
         <h2 className="text-xl font-bold text-gray-100">Let&apos;s get you set up</h2>
         <p className="text-sm text-gray-400">Takes about 2 minutes. You can skip anything.</p>
       </div>
