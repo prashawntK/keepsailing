@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Minimize2, Square, X } from "lucide-react";
+import { Square, X, Minimize2 } from "lucide-react";
 import { useTimer } from "@/components/providers/TimerProvider";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { formatTimerDisplay } from "@/lib/utils";
@@ -18,9 +18,9 @@ interface TimerFocusModalProps {
 
 /* ── Atom rings ── */
 const ATOM_RINGS = [
-  { id: 0, rx: 84, ry: 22, groupRotate: 0,  dur: 3.4, sweep: 1 as const, opacity: 1.0 },
-  { id: 1, rx: 26, ry: 84, groupRotate: 10, dur: 5.2, sweep: 0 as const, opacity: 0.85 },
-  { id: 2, rx: 68, ry: 38, groupRotate: 50, dur: 4.1, sweep: 1 as const, opacity: 0.7 },
+  { id: 0, rx: 140, ry: 36, groupRotate: 0,  dur: 3.4, sweep: 1 as const, opacity: 1.0 },
+  { id: 1, rx: 42,  ry: 140, groupRotate: 10, dur: 5.2, sweep: 0 as const, opacity: 0.85 },
+  { id: 2, rx: 114, ry: 64, groupRotate: 50, dur: 4.1, sweep: 1 as const, opacity: 0.7 },
 ];
 
 function ellipsePath(rx: number, ry: number, sweep: 0 | 1) {
@@ -30,7 +30,7 @@ function ellipsePath(rx: number, ry: number, sweep: 0 | 1) {
 function AtomAnimation({ color, isLight }: { color: string; isLight: boolean }) {
   return (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-      <svg width="220" height="220" viewBox="-110 -110 220 220" style={{ overflow: "visible" }}>
+      <svg width="340" height="340" viewBox="-170 -170 340 340" style={{ overflow: "visible" }}>
         <defs>
           {/* Orb glow — large blur for halo effect */}
           {ATOM_RINGS.map(r => (
@@ -60,12 +60,12 @@ function AtomAnimation({ color, isLight }: { color: string; isLight: boolean }) 
         </defs>
 
         {/* Nucleus glow behind time */}
-        <circle cx="0" cy="0" r="40" fill="url(#nucleus-grad)" />
+        <circle cx="0" cy="0" r="32" fill="url(#nucleus-grad)" />
 
         {/* Nucleus ring — pulsing circle */}
-        <circle cx="0" cy="0" r="28" fill="none" stroke={color} strokeWidth="1.5" strokeOpacity="0.4">
-          <animate attributeName="r" values="26;30;26" dur="2.4s" repeatCount="indefinite" />
-          <animate attributeName="stroke-opacity" values="0.45;0.2;0.45" dur="2.4s" repeatCount="indefinite" />
+        <circle cx="0" cy="0" r="20" fill="none" stroke={color} strokeWidth="1.2" strokeOpacity="0.4">
+          <animate attributeName="r" values="19;22;19" dur="2.4s" repeatCount="indefinite" />
+          <animate attributeName="stroke-opacity" values="0.4;0.15;0.4" dur="2.4s" repeatCount="indefinite" />
         </circle>
 
         {/* The 3 orbital rings + orbs */}
@@ -255,75 +255,41 @@ export function TimerFocusModal({
             exit={{ opacity: 0 }}
           />
 
-          {/* Modal */}
+          {/* Card + buttons stacked */}
+          <div className="relative flex flex-col items-center z-10">
+
+          {/* No card — atom floats directly over backdrop */}
           <motion.div
-            className="relative w-[90vw] max-w-md rounded-3xl overflow-hidden"
-            style={{
-              background: isLight
-                ? "rgba(255,255,255,0.85)"
-                : "var(--glass-panel-bg, rgba(15,15,15,0.9))",
-              border: isLight
-                ? "1px solid rgba(0,0,0,0.08)"
-                : "1px solid rgba(255,255,255,0.08)",
-              boxShadow: isLight
-                ? "0 25px 60px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.9)"
-                : "0 25px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)",
-              backdropFilter: "blur(40px)",
-              WebkitBackdropFilter: "blur(40px)",
-            }}
+            className="w-[90vw] max-w-lg"
             initial={{ scale: 0.9, opacity: 0, y: 30 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 30 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
           >
-            {/* Minimize button */}
-            <button
-              onClick={onClose}
-              className={`absolute top-4 right-4 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                isLight
-                  ? "text-gray-400 hover:text-gray-600 hover:bg-black/5"
-                  : "text-gray-500 hover:text-gray-300 hover:bg-white/5"
-              }`}
-            >
-              <Minimize2 size={16} />
-            </button>
-
             {/* Content */}
-            <div className="flex flex-col items-center px-6 pt-10 pb-8">
-              {/* Emoji + name */}
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl">{timerEmoji}</span>
-                {timerName && (
-                  <span
-                    className={`text-sm font-medium ${
-                      isLight ? "text-gray-600" : "text-gray-400"
-                    }`}
-                  >
-                    {timerName}
-                  </span>
-                )}
-              </div>
-
+            <div className="flex flex-col items-center px-6 pt-8 pb-6">
+              {/* Name only (no emoji) */}
+              {timerName && (
+                <span className={`text-sm font-medium mb-1 ${isLight ? "text-gray-500" : "text-gray-400"}`}>
+                  {timerName}
+                </span>
+              )}
               {stepLabel && (
-                <span
-                  className={`text-xs mb-4 ${
-                    isLight ? "text-gray-500" : "text-gray-500"
-                  }`}
-                >
+                <span className={`text-xs mb-2 ${isLight ? "text-gray-400" : "text-gray-500"}`}>
                   {stepLabel}
                 </span>
               )}
 
-              {/* Central animation area — atom rings orbit around the time nucleus */}
-              <div className="relative flex items-center justify-center my-2 w-[220px] h-[220px]">
+              {/* Central animation area */}
+              <div className="relative flex items-center justify-center my-1 w-[340px] h-[340px]">
                 <AtomAnimation color={resolvedColor} isLight={isLight} />
 
-                {/* Time as nucleus — sits in the center of the atom */}
+                {/* Time as nucleus — small to fit inside */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                   <AnimatePresence mode="popLayout">
                     <motion.span
                       key={displayTime}
-                      className="text-4xl font-mono font-bold tabular-nums"
+                      className="text-lg font-mono font-bold tabular-nums"
                       style={{ color: resolvedColor }}
                       initial={{ y: 4, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
@@ -334,7 +300,7 @@ export function TimerFocusModal({
                     </motion.span>
                   </AnimatePresence>
                   {duration && (
-                    <span className={`text-[11px] mt-0.5 font-mono ${isLight ? "text-gray-400" : "text-gray-500"}`}>
+                    <span className={`text-[10px] mt-0.5 font-mono ${isLight ? "text-gray-400" : "text-gray-500"}`}>
                       / {formatTimerDisplay(duration)}
                     </span>
                   )}
@@ -343,8 +309,8 @@ export function TimerFocusModal({
                 {/* Completion burst */}
                 {isComplete && (
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="absolute w-[220px] h-[220px] rounded-full orb-ring-1" style={{ border: `2px solid ${resolvedColor}` }} />
-                    <div className="absolute w-[220px] h-[220px] rounded-full orb-ring-2" style={{ border: `2px solid ${resolvedColor}` }} />
+                    <div className="absolute w-[260px] h-[260px] rounded-full orb-ring-1" style={{ border: `2px solid ${resolvedColor}` }} />
+                    <div className="absolute w-[260px] h-[260px] rounded-full orb-ring-2" style={{ border: `2px solid ${resolvedColor}` }} />
                   </div>
                 )}
               </div>
@@ -354,57 +320,67 @@ export function TimerFocusModal({
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={milestoneKey}
-                    className="flex items-center gap-2 mb-4"
+                    className="flex items-center gap-2"
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.8, opacity: 0 }}
                     transition={{ type: "spring", stiffness: 400, damping: 15 }}
                   >
-                    <motion.span
-                      className="text-xl"
-                      animate={{ scale: [1, 1.3, 1] }}
-                      transition={{ duration: 0.4, delay: 0.1 }}
-                    >
+                    <motion.span className="text-lg" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.4, delay: 0.1 }}>
                       {milestone.emoji}
                     </motion.span>
-                    <span
-                      className={`text-sm font-semibold ${
-                        isLight ? "text-gray-600" : "text-gray-300"
-                      }`}
-                    >
+                    <span className={`text-sm font-semibold ${isLight ? "text-gray-600" : "text-gray-300"}`}>
                       {milestone.text}
                     </span>
                   </motion.div>
                 </AnimatePresence>
               )}
-
-              {/* Action row */}
-              <div className="flex items-center gap-3 mt-2">
-                <button
-                  onClick={onCancel}
-                  className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                    isLight
-                      ? "text-gray-500 hover:text-red-500 bg-black/5 hover:bg-red-500/10"
-                      : "text-gray-400 hover:text-red-400 bg-white/5 hover:bg-red-500/10"
-                  }`}
-                >
-                  <span className="flex items-center gap-1.5">
-                    <X size={14} />
-                    Discard
-                  </span>
-                </button>
-                <button
-                  onClick={onStop}
-                  className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-red-500/15 text-red-400 hover:bg-red-500/25 border border-red-500/20 hover:border-red-500/40 transition-all"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <Square size={10} fill="currentColor" />
-                    Stop & Save
-                  </span>
-                </button>
-              </div>
             </div>
           </motion.div>
+
+          {/* Icon-only buttons — blended below the atom */}
+          <div className="flex items-center gap-6 mt-4">
+            {/* Discard */}
+            <button
+              onClick={onCancel}
+              title="Discard"
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                isLight
+                  ? "text-gray-400 hover:text-red-400 bg-black/5 hover:bg-red-500/10"
+                  : "text-white/30 hover:text-red-400 bg-white/5 hover:bg-red-500/10"
+              }`}
+            >
+              <X size={16} strokeWidth={1.8} />
+            </button>
+
+            {/* Minimize */}
+            <button
+              onClick={onClose}
+              title="Minimize"
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                isLight
+                  ? "text-gray-400 hover:text-gray-600 bg-black/5 hover:bg-black/10"
+                  : "text-white/30 hover:text-white/60 bg-white/5 hover:bg-white/10"
+              }`}
+            >
+              <Minimize2 size={15} strokeWidth={1.8} />
+            </button>
+
+            {/* Stop & Save */}
+            <button
+              onClick={onStop}
+              title="Stop & Save"
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                isLight
+                  ? "text-red-400 hover:text-red-500 bg-red-500/10 hover:bg-red-500/20"
+                  : "text-red-400/60 hover:text-red-400 bg-red-500/8 hover:bg-red-500/15"
+              }`}
+            >
+              <Square size={13} strokeWidth={1.8} fill="currentColor" />
+            </button>
+          </div>
+
+          </div> {/* end card+buttons wrapper */}
         </motion.div>
       )}
     </AnimatePresence>
