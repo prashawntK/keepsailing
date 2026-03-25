@@ -103,6 +103,7 @@ export default function SignupPage() {
           </label>
           <input
             id="password"
+            name="password"
             type="password"
             required
             minLength={8}
