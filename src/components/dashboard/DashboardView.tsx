@@ -43,7 +43,7 @@ export function DashboardView({ initialData }: DashboardViewProps) {
   const [timerModalOpen, setTimerModalOpen] = useState(false);
   // null = still checking, true = show wizard, false = hide wizard
   const [showOnboarding, setShowOnboarding] = useState<boolean | null>(null);
-  const { timerState } = useTimer();
+  const { timerState, startUniversalTimer } = useTimer();
   const [, startTransition] = useTransition();
   const prevCompletedRef = useRef<number | null>(null); // null = initial load not done yet
   const refreshingRef = useRef(false);
@@ -145,7 +145,10 @@ export function DashboardView({ initialData }: DashboardViewProps) {
         <div className="flex items-center gap-2">
           {!timerState.isRunning && (
             <button
-              onClick={() => setTimerModalOpen(true)}
+              onClick={() => {
+                startUniversalTimer({ type: "goal", id: "free", name: "Focus", emoji: "⏱️", durationMinutes: null });
+                refresh();
+              }}
               className="p-2.5 rounded-xl bg-primary/15 text-primary hover:bg-primary/25 transition-all"
               title="Start timer"
             >
