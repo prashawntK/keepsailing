@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { withApiHandler, getAuthUserId } from "@/lib/api";
+import { createClient } from "@/lib/supabase/server";
 
 export const GET = withApiHandler(async () => {
   const userId = await getAuthUserId();
@@ -34,9 +35,18 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
   if (name !== undefined) updateData.name = name;
   if (onboardingCompleted !== undefined) updateData.onboardingCompleted = onboardingCompleted;
 
-  const user = await prisma.user.update({
+  const supabase = await createClient();
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+
+  const user = await prisma.user.upsert({
     where: { id: userId },
-    data: updateData,
+    update: updateData,
+    create: {
+      id: userId,
+      email: authUser?.email ?? "",
+      name: updateData.name ?? (authUser?.user_metadata?.name as string | undefined) ?? null,
+      onboardingCompleted: updateData.onboardingCompleted ?? false,
+    },
     select: { name: true, onboardingCompleted: true },
   });
 
