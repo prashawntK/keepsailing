@@ -15,6 +15,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "Keep Sailing",
+  applicationName: "Keep Sailing",
   description: "Your daily accountability companion",
   manifest: "/manifest.json",
   appleWebApp: {
