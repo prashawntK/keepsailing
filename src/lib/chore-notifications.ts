@@ -61,7 +61,7 @@ export async function checkAndNotifyChores(
     try {
       const reg = await navigator.serviceWorker?.ready;
       if (reg) {
-        await reg.showNotification("ADHD Scorecard", {
+        await reg.showNotification("keepsailing", {
           body,
           icon: "/icons/icon-192.png",
           badge: "/icons/icon-192.png",
@@ -69,7 +69,7 @@ export async function checkAndNotifyChores(
           data: { url: "/" },
         });
       } else {
-        new Notification("ADHD Scorecard", { body, icon });
+        new Notification("keepsailing", { body, icon });
       }
     } catch {
       // Silent fail — notification APIs can throw in some environments

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 export const metadata: Metadata = {
-  title: "ADHD Scorecard — Sign In",
+  title: "keepsailing — Sign In",
 };
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {

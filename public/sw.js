@@ -1,4 +1,4 @@
-const CACHE_NAME = "adhd-scorecard-v1";
+const CACHE_NAME = "keepsailing-v1";
 const STATIC_ASSETS = ["/", "/manifest.json"];
 
 // Install — cache shell

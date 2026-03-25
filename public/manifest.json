@@ -1,7 +1,7 @@
 {
-  "name": "ADHD Scorecard",
-  "short_name": "Scorecard",
-  "description": "Your daily dopamine-powered accountability companion",
+  "name": "keepsailing",
+  "short_name": "keepsailing",
+  "description": "Your daily accountability companion",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0B0F19",

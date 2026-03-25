@@ -14,13 +14,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "ADHD Scorecard",
-  description: "Your daily dopamine-powered accountability companion",
+  title: "keepsailing",
+  description: "Your daily accountability companion",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "ADHD Scorecard",
+    title: "keepsailing",
   },
   icons: {
     icon: "/icons/icon-192.png",

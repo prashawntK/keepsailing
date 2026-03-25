@@ -56,7 +56,7 @@ export const GET = withApiHandler(async () => {
   return new NextResponse(JSON.stringify(exportData, null, 2), {
     headers: {
       "Content-Type": "application/json",
-      "Content-Disposition": `attachment; filename="adhd-scorecard-export-${new Date().toISOString().slice(0, 10)}.json"`,
+      "Content-Disposition": `attachment; filename="keepsailing-export-${new Date().toISOString().slice(0, 10)}.json"`,
     },
   });
 });

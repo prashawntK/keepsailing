@@ -110,7 +110,7 @@ const row = "flex items-center justify-between py-3 border-b border-white/[0.06]
       </Suspense>
       <div>
         <h1 className="text-2xl font-bold text-gray-100">Settings</h1>
-        <p className="text-sm text-gray-400">Customise your scorecard</p>
+        <p className="text-sm text-gray-400">Customise your journey</p>
       </div>
 
       {/* Appearance */}
@@ -288,7 +288,7 @@ const row = "flex items-center justify-between py-3 border-b border-white/[0.06]
         </div>
       </section>
 
-      <p className="text-center text-xs text-gray-600 pb-4">ADHD Scorecard · Built with ❤️</p>
+      <p className="text-center text-xs text-gray-600 pb-4">keepsailing · Built with ❤️</p>
 
       {/* Delete confirmation modal */}
       {showDeleteConfirm && (

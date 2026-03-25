@@ -11,7 +11,7 @@ import {
 import { formatTimerDisplay } from "@/lib/utils";
 import type { TimerState, TimerTargetType } from "@/types";
 
-const STORAGE_KEY = "adhd-scorecard-timer";
+const STORAGE_KEY = "keepsailing-timer";
 
 export interface StartUniversalTimerParams {
   type: TimerTargetType;
