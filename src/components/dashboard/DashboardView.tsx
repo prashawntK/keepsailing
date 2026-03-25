@@ -43,6 +43,7 @@ export function DashboardView({ initialData }: DashboardViewProps) {
   const [timerModalOpen, setTimerModalOpen] = useState(false);
   // null = still checking, true = show wizard, false = hide wizard
   const [showOnboarding, setShowOnboarding] = useState<boolean | null>(null);
+  const onboardingDismissedRef = useRef(false);
   const { timerState, startUniversalTimer } = useTimer();
   const [, startTransition] = useTransition();
   const prevCompletedRef = useRef<number | null>(null); // null = initial load not done yet
@@ -62,12 +63,8 @@ export function DashboardView({ initialData }: DashboardViewProps) {
         setData(next);
         setLoading(false);
         // Set onboarding state from dashboard response — never re-show once dismissed
-        if (next.user !== undefined) {
-          setShowOnboarding((prev) => {
-            // If already closed (false), never re-open from a stale server response
-            if (prev === false) return false;
-            return !next.user?.onboardingCompleted;
-          });
+        if (next.user !== undefined && !onboardingDismissedRef.current) {
+          setShowOnboarding(!next.user?.onboardingCompleted);
         }
         // Only fire confetti when count genuinely increases AFTER the first load.
         // prevCompletedRef starts as null so the initial page load never triggers it.
@@ -222,6 +219,7 @@ export function DashboardView({ initialData }: DashboardViewProps) {
       {showOnboarding === true && (
         <OnboardingWizard
           onComplete={() => {
+            onboardingDismissedRef.current = true;
             setShowOnboarding(false);
             refresh();
           }}
