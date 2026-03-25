@@ -101,18 +101,7 @@ export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
             >
               <X size={11} />
             </button>
-            <button
-              onClick={() => setFocusOpen(true)}
-              title="Expand"
-              className={`w-7 h-7 rounded-full flex items-center justify-center transition-all border ${
-                isLight
-                  ? "bg-white/90 border-black/10 text-gray-500 hover:text-primary hover:border-primary/30"
-                  : "bg-[#1a1a1a] border-white/[0.08] text-gray-400 hover:text-primary hover:border-primary/30"
-              }`}
-              style={{ backdropFilter: "blur(12px)" }}
-            >
-              <Maximize2 size={10} />
-            </button>
+            {/* Maximize button hidden — work in progress */}
             <button
               onClick={handleStop}
               title="Stop & Save"
