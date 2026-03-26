@@ -7,9 +7,22 @@ import Lottie from "lottie-react";
 import { useTimer } from "@/components/providers/TimerProvider";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { formatTimerDisplay } from "@/lib/utils";
+import { applyNewshipTheme } from "@/lib/lottieTheme";
+import type { Theme } from "@/components/providers/ThemeProvider";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const shipAnimation = require("../../../public/animations/newship.json");
+const newshipRaw = require("../../../public/animations/newship.json");
 import type { GoalWithProgress } from "@/types";
+
+// Module-level cache — each theme is processed once ever, never on re-render
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const animCache = new Map<Theme, any>();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getThemedAnimation(theme: Theme): any {
+  if (!animCache.has(theme)) {
+    animCache.set(theme, applyNewshipTheme(newshipRaw, theme));
+  }
+  return animCache.get(theme);
+}
 
 interface TimerFocusModalProps {
   open: boolean;
@@ -217,7 +230,7 @@ export function TimerFocusModal({
                 {/* Canvas renderer is far lighter than SVG for complex animations */}
                 <div className="w-[340px] h-[340px]">
                   <Lottie
-                    animationData={shipAnimation}
+                    animationData={getThemedAnimation(theme)}
                     loop
                     autoplay
                     style={{ width: "100%", height: "100%" }}
