@@ -215,14 +215,17 @@ export function TimerFocusModal({
               )}
 
               {/* Lottie + optional progress ring */}
-              <div className="relative flex items-center justify-center w-[300px] h-[300px]">
+              <div className="relative flex items-center justify-center w-[300px] h-[300px] isolate">
                 {/* Progress ring sits on top of the animation when duration is set */}
                 {duration && (
                   <ProgressRing percentage={pct} color={resolvedColor} size={300} strokeWidth={4} />
                 )}
 
-                {/* Lottie ship animation */}
-                <div className="w-[260px] h-[260px]">
+                {/* Lottie ship animation — blend mode strips the solid background */}
+                <div
+                  className="w-[260px] h-[260px]"
+                  style={{ mixBlendMode: isLight ? "multiply" : "screen" }}
+                >
                   <Lottie
                     animationData={animationData}
                     loop
