@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 const QUOTES = [
   // ── Zen & presence ─────────────────────────────────────────────────────────
@@ -222,15 +223,22 @@ export function NavigationLoader() {
             </motion.span>
           </div>
 
-          {/* Logo + quote */}
+          {/* Ship animation + quote */}
           <motion.div
-            className="relative z-10 flex flex-col items-center gap-6 px-8 max-w-sm text-center"
+            className="relative z-10 flex flex-col items-center gap-4 px-8 max-w-sm text-center"
             initial={{ y: 12, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.3, delay: 0.06 }}
           >
-            {/* Logo */}
-            <img src="/logo.svg" alt="Keep Sailing" className="w-10 h-10 opacity-70" />
+            {/* Ship Lottie */}
+            <div className="w-48 h-48 -mb-4">
+              <DotLottieReact
+                src="/animations/ship-sailing.lottie"
+                loop
+                autoplay
+                style={{ width: "100%", height: "100%" }}
+              />
+            </div>
 
             {/* Quote */}
             <div className="space-y-3">
