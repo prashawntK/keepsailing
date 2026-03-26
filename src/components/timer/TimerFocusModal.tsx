@@ -203,7 +203,6 @@ export function TimerFocusModal({
             >
               {/* Goal name + step label */}
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-lg">{timerEmoji}</span>
                 <span className={`text-sm font-medium ${isLight ? "text-gray-600" : "text-gray-300"}`}>
                   {timerName}
                 </span>
