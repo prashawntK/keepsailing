@@ -221,10 +221,12 @@ export function TimerFocusModal({
                   <ProgressRing percentage={pct} color={resolvedColor} size={300} strokeWidth={4} />
                 )}
 
-                {/* Lottie ship animation — blend mode strips the solid background */}
+                {/* Lottie ship animation
+                    Dark themes: navy replaced with black → screen blend makes it transparent.
+                    Light theme:  no blend needed; animation sits on the blurred backdrop. */}
                 <div
                   className="w-[260px] h-[260px]"
-                  style={{ mixBlendMode: isLight ? "multiply" : "screen" }}
+                  style={isLight ? undefined : { mixBlendMode: "screen" }}
                 >
                   <Lottie
                     animationData={animationData}
