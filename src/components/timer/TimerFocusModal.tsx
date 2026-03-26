@@ -242,28 +242,28 @@ export function TimerFocusModal({
                     />
                   </div>
                 )}
-              </div>
 
-              {/* Large time display */}
-              <div className="flex flex-col items-center mt-2">
-                <AnimatePresence mode="popLayout">
-                  <motion.span
-                    key={displayTime}
-                    className="text-5xl font-mono font-bold tabular-nums"
-                    style={{ color: resolvedColor }}
-                    initial={{ y: 6, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: -6, opacity: 0 }}
-                    transition={{ duration: 0.15 }}
-                  >
-                    {displayTime}
-                  </motion.span>
-                </AnimatePresence>
-                {duration && (
-                  <span className={`text-xs mt-1 font-mono ${isLight ? "text-gray-400" : "text-gray-500"}`}>
-                    / {formatTimerDisplay(duration)}
-                  </span>
-                )}
+                {/* Time overlaid at the bottom of the animation — no extra vertical space */}
+                <div className="absolute bottom-2 left-0 right-0 flex flex-col items-center pointer-events-none">
+                  <AnimatePresence mode="popLayout">
+                    <motion.span
+                      key={displayTime}
+                      className="text-5xl font-mono font-bold tabular-nums"
+                      style={{ color: resolvedColor }}
+                      initial={{ y: 6, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: -6, opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      {displayTime}
+                    </motion.span>
+                  </AnimatePresence>
+                  {duration && (
+                    <span className={`text-xs mt-0.5 font-mono ${isLight ? "text-gray-400" : "text-gray-500"}`}>
+                      / {formatTimerDisplay(duration)}
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Milestone badge */}
