@@ -134,8 +134,8 @@ const SECTION_WORDS: Record<string, string> = {
   "/settings": "SETTINGS",
 };
 
-const SLOW_THRESHOLD_MS = 400; // only show if page takes longer than this
-const MIN_DISPLAY_MS = 1200; // once shown, keep visible at least this long
+const FAST_THRESHOLD_MS = 300; // if page loads within this, dismiss instantly
+const MIN_DISPLAY_MS = 1400; // if slow, keep visible long enough to read
 
 export function NavigationLoader() {
   const pathname = usePathname();
@@ -144,12 +144,10 @@ export function NavigationLoader() {
   const [quote, setQuote] = useState(QUOTES[0]);
   const [word, setWord] = useState("SAIL");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const slowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navTimeRef = useRef<number>(0);
-  const cancelledRef = useRef(false);
+  const isSlowRef = useRef(false);
 
   useEffect(() => {
-    // Skip on very first render (initial page load)
     if (prevPathRef.current === null) {
       prevPathRef.current = pathname;
       return;
@@ -157,42 +155,39 @@ export function NavigationLoader() {
     if (pathname === prevPathRef.current) return;
 
     prevPathRef.current = pathname;
-    cancelledRef.current = false;
+    isSlowRef.current = false;
 
-    // Pre-pick quote and word so they're ready if we show
     setQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
-    const sectionWord = SECTION_WORDS[pathname] ?? "SAIL";
-    setWord(sectionWord);
+    setWord(SECTION_WORDS[pathname] ?? "SAIL");
 
-    // Record navigation start time
+    // Show immediately on every navigation
     navTimeRef.current = performance.now();
+    setShow(true);
 
-    // Wait for the slow threshold — if page hasn't settled by then, show loader
-    if (slowTimerRef.current) clearTimeout(slowTimerRef.current);
-    slowTimerRef.current = setTimeout(() => {
-      if (cancelledRef.current) return;
-      setShow(true);
-
-      // Keep visible for minimum display time
+    // After the fast threshold, check if we should keep it or dismiss
+    const slowCheck = setTimeout(() => {
+      // If still showing after threshold, it's a slow load — keep for full duration
+      isSlowRef.current = true;
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => setShow(false), MIN_DISPLAY_MS);
-    }, SLOW_THRESHOLD_MS);
+    }, FAST_THRESHOLD_MS);
 
-    // Check if page renders quickly — use rAF chain to detect paint completion
+    // Use rAF chain to detect fast paint
     let frame1: number;
     let frame2: number;
     frame1 = requestAnimationFrame(() => {
       frame2 = requestAnimationFrame(() => {
         const elapsed = performance.now() - navTimeRef.current;
-        if (elapsed < SLOW_THRESHOLD_MS) {
-          // Page loaded fast — cancel the loader
-          cancelledRef.current = true;
-          if (slowTimerRef.current) clearTimeout(slowTimerRef.current);
+        if (elapsed < FAST_THRESHOLD_MS && !isSlowRef.current) {
+          // Fast load — dismiss immediately
+          clearTimeout(slowCheck);
+          setShow(false);
         }
       });
     });
 
     return () => {
+      clearTimeout(slowCheck);
       cancelAnimationFrame(frame1);
       cancelAnimationFrame(frame2);
     };
