@@ -6,24 +6,15 @@ import { Square, X, Minimize2 } from "lucide-react";
 import Lottie, { type LottieRefCurrentProps } from "lottie-react";
 import { useTimer } from "@/components/providers/TimerProvider";
 import { useTheme } from "@/components/providers/ThemeProvider";
-import type { Theme } from "@/components/providers/ThemeProvider";
 import { formatTimerDisplay } from "@/lib/utils";
-import { applyLottieTheme } from "@/lib/lottieTheme";
+import { stripLottieBackground } from "@/lib/lottieTheme";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const timershipRaw = require("../../../public/animations/timership.json");
+const ship3Raw = require("../../../public/animations/ship3.json");
 import type { GoalWithProgress } from "@/types";
 
-// Module-level cache — applyLottieTheme does a full 137KB JSON deep-traverse.
-// Computing it here means it runs once per theme ever, not on every modal open.
+// Preprocess once at module load — strip solid bg, keep natural colours
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const animationCache = new Map<Theme, any>();
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getThemedAnimation(theme: Theme): any {
-  if (!animationCache.has(theme)) {
-    animationCache.set(theme, applyLottieTheme(timershipRaw, theme));
-  }
-  return animationCache.get(theme);
-}
+const shipAnimation: any = stripLottieBackground(ship3Raw);
 
 interface TimerFocusModalProps {
   open: boolean;
@@ -146,8 +137,6 @@ export function TimerFocusModal({
       .getPropertyValue("--color-primary").trim() || "#6366F1";
   }, [color]);
 
-  // Pull from module-level cache — zero computation cost after first use
-  const animationData = getThemedAnimation(theme);
 
   const milestone = duration ? getMilestone(pct) : null;
 
@@ -259,7 +248,7 @@ export function TimerFocusModal({
                   <Lottie
                     key={lottieKey}
                     lottieRef={lottieRef}
-                    animationData={animationData}
+                    animationData={shipAnimation}
                     loop
                     autoplay
                     renderer={"canvas" as "svg"}

@@ -36,14 +36,20 @@ function stripBackground(data: any): any {
 /**
  * Apply theme primary colour to a Lottie animation JSON and remove the
  * solid background layer so it renders transparently over any backdrop.
+ * Used for animations that contain the #797ff7 indigo accent (timership).
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function applyLottieTheme(animationData: any, theme: Theme): any {
   const target = THEME_PRIMARY[theme] ?? THEME_PRIMARY["detrimental-dark"];
-
-  // 1. Swap the accent colour
   const recoloured = replaceColor(BASE_ACCENT, target, animationData);
-
-  // 2. Strip the solid white background layer
   return stripBackground(recoloured);
+}
+
+/**
+ * Strip the solid background layer only — for animations with their own
+ * colour palette that shouldn't be recoloured (e.g. ship3).
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function stripLottieBackground(animationData: any): any {
+  return stripBackground(animationData);
 }
