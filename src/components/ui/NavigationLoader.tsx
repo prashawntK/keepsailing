@@ -213,21 +213,6 @@ export function NavigationLoader() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.18 }}
         >
-          {/* Giant faint watermark word */}
-          <div
-            className="absolute inset-0 flex items-center justify-center select-none pointer-events-none overflow-hidden"
-            aria-hidden
-          >
-            <motion.span
-              className={`font-black tracking-[0.25em] ${isLight ? "text-black/[0.05]" : "text-white/[0.04]"}`}
-              style={{ fontSize: "clamp(80px, 22vw, 200px)" }}
-              initial={{ scale: 0.92, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-            >
-              {word}
-            </motion.span>
-          </div>
 
           {/* Ship animation + quote */}
           <motion.div
