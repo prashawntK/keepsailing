@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import Lottie from "lottie-react";
+import shipAnimation from "../../../public/animations/ship-sailing.json";
+import { useTheme } from "@/components/providers/ThemeProvider";
 
 const QUOTES = [
   // ── Zen & presence ─────────────────────────────────────────────────────────
@@ -139,6 +141,8 @@ const FAST_THRESHOLD_MS = 300; // if page loads within this, dismiss instantly
 const MIN_DISPLAY_MS = 1400; // if slow, keep visible long enough to read
 
 export function NavigationLoader() {
+  const { theme } = useTheme();
+  const isLight = theme === "lucid-light";
   const pathname = usePathname();
   const prevPathRef = useRef<string | null>(null);
   const [show, setShow] = useState(false);
@@ -213,7 +217,7 @@ export function NavigationLoader() {
             aria-hidden
           >
             <motion.span
-              className="font-black tracking-[0.25em] text-white/[0.04]"
+              className={`font-black tracking-[0.25em] ${isLight ? "text-black/[0.05]" : "text-white/[0.04]"}`}
               style={{ fontSize: "clamp(80px, 22vw, 200px)" }}
               initial={{ scale: 0.92, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -232,21 +236,21 @@ export function NavigationLoader() {
           >
             {/* Ship Lottie */}
             <div className="w-48 h-48 -mb-4">
-              <DotLottieReact
-                src="/animations/ship-sailing.lottie"
+              <Lottie
+                animationData={shipAnimation}
                 loop
-                autoplay
+                autoPlay
                 style={{ width: "100%", height: "100%" }}
               />
             </div>
 
             {/* Quote */}
             <div className="space-y-3">
-              <p className="text-lg font-medium text-gray-200 leading-snug">
+              <p className={`text-lg font-medium leading-snug ${isLight ? "text-gray-700" : "text-gray-200"}`}>
                 &ldquo;{quote.text}&rdquo;
               </p>
               {quote.author && (
-                <p className="text-xs text-gray-500 tracking-wide">— {quote.author}</p>
+                <p className={`text-xs tracking-wide ${isLight ? "text-gray-400" : "text-gray-500"}`}>— {quote.author}</p>
               )}
             </div>
           </motion.div>
@@ -261,7 +265,9 @@ export function NavigationLoader() {
                 left: "-10%",
                 width: `${30 + Math.random() * 25}%`,
                 height: "1px",
-                background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,${0.03 + (i % 3) * 0.015}) 40%, transparent 100%)`,
+                background: isLight
+                  ? `linear-gradient(90deg, transparent 0%, rgba(0,0,0,${0.04 + (i % 3) * 0.02}) 40%, transparent 100%)`
+                  : `linear-gradient(90deg, transparent 0%, rgba(255,255,255,${0.03 + (i % 3) * 0.015}) 40%, transparent 100%)`,
               }}
               initial={{ x: "-100%", opacity: 0 }}
               animate={{ x: "140vw", opacity: [0, 1, 1, 0] }}
