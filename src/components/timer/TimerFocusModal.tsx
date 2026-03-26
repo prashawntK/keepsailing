@@ -95,6 +95,12 @@ export function TimerFocusModal({
   const isLight = theme === "lucid-light";
   const prevMilestoneRef = useRef<number>(-1);
   const [milestoneKey, setMilestoneKey] = useState(0);
+  const [lottieKey, setLottieKey] = useState(0);
+
+  // Force a fresh Lottie instance every time the modal opens to prevent stalling
+  useEffect(() => {
+    if (open) setLottieKey((k) => k + 1);
+  }, [open]);
 
   const activeGoal = timerState.isRunning
     ? goals?.find((g) => g.id === timerState.goalId)
@@ -230,9 +236,10 @@ export function TimerFocusModal({
                   <ProgressRing percentage={pct} color={resolvedColor} size={300} strokeWidth={4} />
                 )}
 
-                {/* Lottie ship animation — bg solid layer stripped in applyLottieTheme */}
+                {/* Lottie ship animation — key forces full reinit on each open */}
                 <div className="w-[260px] h-[260px]">
                   <Lottie
+                    key={lottieKey}
                     animationData={animationData}
                     loop
                     autoplay
