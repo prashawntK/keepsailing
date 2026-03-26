@@ -7,14 +7,9 @@ import Lottie from "lottie-react";
 import { useTimer } from "@/components/providers/TimerProvider";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { formatTimerDisplay } from "@/lib/utils";
-import { stripLottieBackground } from "@/lib/lottieTheme";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const ship3Raw = require("../../../public/animations/ship3.json");
+const shipAnimation = require("../../../public/animations/newship.json");
 import type { GoalWithProgress } from "@/types";
-
-// Preprocess once at module load — strip solid bg, keep natural colours
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const shipAnimation: any = stripLottieBackground(ship3Raw);
 
 interface TimerFocusModalProps {
   open: boolean;
