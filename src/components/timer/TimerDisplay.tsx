@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, Fragment } from "react";
-import { Maximize2, Square, X } from "lucide-react";
+import { Square, X } from "lucide-react";
 import { useTimer } from "@/components/providers/TimerProvider";
 import { formatTimerDisplay, cn } from "@/lib/utils";
 import { useToast } from "@/lib/toast";
@@ -101,18 +101,7 @@ export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
             >
               <X size={11} />
             </button>
-            <button
-              onClick={() => setFocusOpen(true)}
-              title="Focus view"
-              className={`w-7 h-7 rounded-full flex items-center justify-center transition-all border ${
-                isLight
-                  ? "bg-white/90 border-black/10 text-gray-500 hover:text-primary hover:border-primary/30"
-                  : "bg-[#1a1a1a] border-white/[0.08] text-gray-400 hover:text-primary hover:border-primary/30"
-              }`}
-              style={{ backdropFilter: "blur(12px)" }}
-            >
-              <Maximize2 size={11} />
-            </button>
+
             <button
               onClick={handleStop}
               title="Stop & Save"
@@ -131,7 +120,6 @@ export function TimerDisplay({ onRefresh, goals }: TimerDisplayProps) {
               isComplete && "timer-breathing-complete"
             )}
             style={{ ...pillStyle, borderRadius: "999px" }}
-            onClick={() => setFocusOpen(true)}
           >
             <div className="flex items-center gap-2.5 px-4 py-2">
               <span className="relative flex-shrink-0">
