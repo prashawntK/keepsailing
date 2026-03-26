@@ -42,23 +42,22 @@ export default function RootLayout({
         <ThemeProvider>
           <TimerProvider>
             <ToastProvider>
+            {/* Navigation loading screen — outside all containers so it covers everything */}
+            <NavigationLoader />
             <div className="min-h-screen bg-surface-base text-gray-50 relative">
               {/* Dynamic Ambient Background Blobs */}
               <div
                 className="ambient-blob bg-primary"
                 style={{ width: '60vw', height: '60vh', top: '-15%', left: '-15%' }}
               />
-              <div 
+              <div
                 className="ambient-blob bg-xp"
                 style={{ width: '70vw', height: '70vh', bottom: '-20%', right: '-10%', animationDelay: '-10s' }}
               />
-              <div 
+              <div
                 className="ambient-blob bg-success"
                 style={{ width: '50vw', height: '50vh', top: '30%', left: '40%', animationDelay: '-5s' }}
               />
-
-              {/* Navigation loading screen */}
-              <NavigationLoader />
 
               {/* Main App Container */}
               <div className="relative z-10 flex flex-col min-h-screen">
