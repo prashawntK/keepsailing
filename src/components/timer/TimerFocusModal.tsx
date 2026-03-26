@@ -213,14 +213,14 @@ export function TimerFocusModal({
               )}
 
               {/* Lottie + optional progress ring */}
-              <div className="relative flex items-center justify-center w-[300px] h-[300px] isolate">
+              <div className="relative flex items-center justify-center w-[380px] h-[380px] isolate">
                 {/* Progress ring sits on top of the animation when duration is set */}
                 {duration && (
-                  <ProgressRing percentage={pct} color={resolvedColor} size={300} strokeWidth={4} />
+                  <ProgressRing percentage={pct} color={resolvedColor} size={380} strokeWidth={4} />
                 )}
 
                 {/* Canvas renderer is far lighter than SVG for complex animations */}
-                <div className="w-[260px] h-[260px]">
+                <div className="w-[340px] h-[340px]">
                   <Lottie
                     animationData={shipAnimation}
                     loop
