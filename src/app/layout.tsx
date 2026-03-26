@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { TimerProvider } from "@/components/providers/TimerProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import { Navigation } from "@/components/ui/Navigation";
+import { NavigationLoader } from "@/components/ui/NavigationLoader";
 import { ServiceWorkerRegistrar } from "@/components/providers/ServiceWorkerRegistrar";
 
 export const viewport: Viewport = {
@@ -55,6 +56,9 @@ export default function RootLayout({
                 className="ambient-blob bg-success"
                 style={{ width: '50vw', height: '50vh', top: '30%', left: '40%', animationDelay: '-5s' }}
               />
+
+              {/* Navigation loading screen */}
+              <NavigationLoader />
 
               {/* Main App Container */}
               <div className="relative z-10 flex flex-col min-h-screen">
