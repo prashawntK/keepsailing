@@ -1,16 +1,29 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react"; // useMemo still used for resolvedColor + wash
 import { motion, AnimatePresence } from "framer-motion";
 import { Square, X, Minimize2 } from "lucide-react";
 import Lottie from "lottie-react";
 import { useTimer } from "@/components/providers/TimerProvider";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import type { Theme } from "@/components/providers/ThemeProvider";
 import { formatTimerDisplay } from "@/lib/utils";
 import { applyLottieTheme } from "@/lib/lottieTheme";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const timershipRaw = require("../../../public/animations/timership.json");
 import type { GoalWithProgress } from "@/types";
+
+// Module-level cache — applyLottieTheme does a full 137KB JSON deep-traverse.
+// Computing it here means it runs once per theme ever, not on every modal open.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const animationCache = new Map<Theme, any>();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getThemedAnimation(theme: Theme): any {
+  if (!animationCache.has(theme)) {
+    animationCache.set(theme, applyLottieTheme(timershipRaw, theme));
+  }
+  return animationCache.get(theme);
+}
 
 interface TimerFocusModalProps {
   open: boolean;
@@ -109,11 +122,8 @@ export function TimerFocusModal({
       .getPropertyValue("--color-primary").trim() || "#6366F1";
   }, [color]);
 
-  // Theme-coloured Lottie data — recompute only when theme changes
-  const animationData = useMemo(
-    () => applyLottieTheme(timershipRaw, theme),
-    [theme]
-  );
+  // Pull from module-level cache — zero computation cost after first use
+  const animationData = getThemedAnimation(theme);
 
   const milestone = duration ? getMilestone(pct) : null;
 
