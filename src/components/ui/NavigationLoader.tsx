@@ -137,8 +137,23 @@ const SECTION_WORDS: Record<string, string> = {
   "/settings": "SETTINGS",
 };
 
-const FAST_THRESHOLD_MS = 300; // if page loads within this, dismiss instantly
-const MIN_DISPLAY_MS = 1400; // if slow, keep visible long enough to read
+const DISPLAY_MS = 2000; // show for 2 seconds on home
+
+// Prefetch data for other pages so they load instantly
+function prefetchOtherPages() {
+  const today = new Date().toISOString().slice(0, 10);
+  const endpoints = [
+    "/api/goals",
+    "/api/extra-curriculars",
+    "/api/chores",
+    "/api/stats/overview?period=week",
+    "/api/stats/charts?type=daily_scores&period=week",
+    "/api/settings",
+  ];
+  endpoints.forEach((url) => {
+    fetch(url).catch(() => {}); // fire and forget — warms up cache + serverless
+  });
+}
 
 export function NavigationLoader() {
   const { theme } = useTheme();
@@ -149,9 +164,21 @@ export function NavigationLoader() {
   const [quote, setQuote] = useState(QUOTES[0]);
   const [word, setWord] = useState("SAIL");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const navTimeRef = useRef<number>(0);
-  const isSlowRef = useRef(false);
+  const hasShownInitial = useRef(false);
 
+  // Show on initial app load (home)
+  useEffect(() => {
+    if (pathname === "/" && !hasShownInitial.current) {
+      hasShownInitial.current = true;
+      setQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
+      setWord("TODAY");
+      setShow(true);
+      prefetchOtherPages();
+      timerRef.current = setTimeout(() => setShow(false), DISPLAY_MS);
+    }
+  }, [pathname]);
+
+  // Show when navigating TO home (not initial load)
   useEffect(() => {
     if (prevPathRef.current === null) {
       prevPathRef.current = pathname;
@@ -159,43 +186,20 @@ export function NavigationLoader() {
     }
     if (pathname === prevPathRef.current) return;
 
+    const prevPath = prevPathRef.current;
     prevPathRef.current = pathname;
-    isSlowRef.current = false;
+
+    // Only show on home route
+    if (pathname !== "/") return;
 
     setQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
-    setWord(SECTION_WORDS[pathname] ?? "SAIL");
-
-    // Show immediately on every navigation
-    navTimeRef.current = performance.now();
+    setWord("TODAY");
     setShow(true);
+    prefetchOtherPages();
 
-    // After the fast threshold, check if we should keep it or dismiss
-    const slowCheck = setTimeout(() => {
-      // If still showing after threshold, it's a slow load — keep for full duration
-      isSlowRef.current = true;
-      if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => setShow(false), MIN_DISPLAY_MS);
-    }, FAST_THRESHOLD_MS);
-
-    // Use rAF chain to detect fast paint
-    let frame1: number;
-    let frame2: number;
-    frame1 = requestAnimationFrame(() => {
-      frame2 = requestAnimationFrame(() => {
-        const elapsed = performance.now() - navTimeRef.current;
-        if (elapsed < FAST_THRESHOLD_MS && !isSlowRef.current) {
-          // Fast load — dismiss immediately
-          clearTimeout(slowCheck);
-          setShow(false);
-        }
-      });
-    });
-
-    return () => {
-      clearTimeout(slowCheck);
-      cancelAnimationFrame(frame1);
-      cancelAnimationFrame(frame2);
-    };
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setShow(false), DISPLAY_MS);
+  }, [pathname]);
   }, [pathname]);
 
   return (
