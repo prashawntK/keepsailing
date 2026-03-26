@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Square, X, Minimize2 } from "lucide-react";
-import Lottie, { type LottieRefCurrentProps } from "lottie-react";
+import Lottie from "lottie-react";
 import { useTimer } from "@/components/providers/TimerProvider";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { formatTimerDisplay } from "@/lib/utils";
@@ -86,30 +86,6 @@ export function TimerFocusModal({
   const isLight = theme === "lucid-light";
   const prevMilestoneRef = useRef<number>(-1);
   const [milestoneKey, setMilestoneKey] = useState(0);
-  const [lottieKey, setLottieKey] = useState(0);
-  const lottieRef = useRef<LottieRefCurrentProps>(null);
-
-  // On open: bump key (fresh instance) then ensure it's playing
-  useEffect(() => {
-    if (!open) return;
-    setLottieKey((k) => k + 1);
-    // Give Lottie a tick to mount before calling play
-    const t = setTimeout(() => lottieRef.current?.play(), 50);
-    return () => clearTimeout(t);
-  }, [open]);
-
-  // Health-check: if animation stalls while modal is open, nudge it back
-  useEffect(() => {
-    if (!open) return;
-    const interval = setInterval(() => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const anim = (lottieRef.current as any)?.animationItem;
-      if (anim && anim.isPaused && !anim.isStopped) {
-        anim.play();
-      }
-    }, 500);
-    return () => clearInterval(interval);
-  }, [open]);
 
   const activeGoal = timerState.isRunning
     ? goals?.find((g) => g.id === timerState.goalId)
@@ -246,12 +222,9 @@ export function TimerFocusModal({
                 {/* Canvas renderer is far lighter than SVG for complex animations */}
                 <div className="w-[260px] h-[260px]">
                   <Lottie
-                    key={lottieKey}
-                    lottieRef={lottieRef}
                     animationData={shipAnimation}
                     loop
                     autoplay
-                    renderer={"canvas" as "svg"}
                     style={{ width: "100%", height: "100%" }}
                   />
                 </div>
