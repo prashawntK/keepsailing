@@ -217,15 +217,27 @@ export function NavigationLoader() {
             </div>
           </motion.div>
 
-          {/* Progress bar at bottom */}
-          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/[0.05]">
+          {/* Wind streaks */}
+          {[...Array(6)].map((_, i) => (
             <motion.div
-              className="h-full bg-primary/60"
-              initial={{ width: "0%" }}
-              animate={{ width: "100%" }}
-              transition={{ duration: MIN_DISPLAY_MS / 1000, ease: "linear" }}
+              key={i}
+              className="absolute pointer-events-none"
+              style={{
+                top: `${15 + i * 14}%`,
+                left: "-10%",
+                width: `${30 + Math.random() * 25}%`,
+                height: "1px",
+                background: `linear-gradient(90deg, transparent 0%, rgba(255,255,255,${0.03 + (i % 3) * 0.015}) 40%, transparent 100%)`,
+              }}
+              initial={{ x: "-100%", opacity: 0 }}
+              animate={{ x: "140vw", opacity: [0, 1, 1, 0] }}
+              transition={{
+                duration: 1.2 + i * 0.15,
+                delay: 0.05 + i * 0.08,
+                ease: "easeInOut",
+              }}
             />
-          </div>
+          ))}
         </motion.div>
       )}
     </AnimatePresence>
