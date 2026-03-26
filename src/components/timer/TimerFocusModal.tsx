@@ -228,7 +228,13 @@ export function TimerFocusModal({
                 )}
 
                 {/* Canvas renderer is far lighter than SVG for complex animations */}
-                <div className="w-[340px] h-[340px]">
+                <div
+                  className="w-[340px] h-[340px]"
+                  style={{
+                    maskImage: "radial-gradient(ellipse 80% 75% at 50% 52%, black 45%, transparent 72%)",
+                    WebkitMaskImage: "radial-gradient(ellipse 80% 75% at 50% 52%, black 45%, transparent 72%)",
+                  }}
+                >
                   <Lottie
                     animationData={getThemedAnimation(theme)}
                     loop
