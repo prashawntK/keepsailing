@@ -14,21 +14,24 @@ const THEME_PRIMARY: Record<Theme, [number, number, number]> = {
 // The main indigo accent in timership.json to replace with the theme colour
 const BASE_ACCENT: [number, number, number] = [121, 127, 247]; // #797ff7
 
+/** Returns true for any solid-colour background layer */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isSolidBg(l: any) { return l.ty === 1; }
+
 /**
- * Remove the solid "bg" layer (white circle backdrop) from every asset's
- * layer list so the animation renders on a transparent background.
+ * Remove solid background layers from both top-level layers and every
+ * asset's layer list so the animation renders on a transparent background.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function stripBackground(data: any): any {
-  if (!data?.assets) return data;
   return {
     ...data,
-    assets: data.assets.map((asset: any) => {
+    // Strip from top-level layers
+    layers: data.layers?.filter((l: any) => !isSolidBg(l)),
+    // Strip from asset compositions
+    assets: data.assets?.map((asset: any) => {
       if (!asset.layers) return asset;
-      return {
-        ...asset,
-        layers: asset.layers.filter((l: any) => l.nm !== "bg" && l.ty !== 1),
-      };
+      return { ...asset, layers: asset.layers.filter((l: any) => !isSolidBg(l)) };
     }),
   };
 }
