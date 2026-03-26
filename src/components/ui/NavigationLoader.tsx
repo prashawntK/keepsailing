@@ -186,7 +186,6 @@ export function NavigationLoader() {
     }
     if (pathname === prevPathRef.current) return;
 
-    const prevPath = prevPathRef.current;
     prevPathRef.current = pathname;
 
     // Only show on home route
@@ -199,7 +198,6 @@ export function NavigationLoader() {
 
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => setShow(false), DISPLAY_MS);
-  }, [pathname]);
   }, [pathname]);
 
   return (
