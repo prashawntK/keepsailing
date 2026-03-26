@@ -14,30 +14,36 @@ const THEME_PRIMARY: Record<Theme, [number, number, number]> = {
 // The main indigo accent in timership.json to replace with the theme colour
 const BASE_ACCENT: [number, number, number] = [121, 127, 247]; // #797ff7
 
-// The two navy background/sky colours in timership.json
-// We replace them with pure black so mix-blend-mode:screen makes them vanish.
-const NAVY_COLORS: Array<[number, number, number]> = [
-  [26, 43, 149],  // #1a2b95
-  [27, 44, 150],  // #1b2c96
-];
-const BLACK: [number, number, number] = [0, 0, 0];
+/**
+ * Remove the solid "bg" layer (white circle backdrop) from every asset's
+ * layer list so the animation renders on a transparent background.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function stripBackground(data: any): any {
+  if (!data?.assets) return data;
+  return {
+    ...data,
+    assets: data.assets.map((asset: any) => {
+      if (!asset.layers) return asset;
+      return {
+        ...asset,
+        layers: asset.layers.filter((l: any) => l.nm !== "bg" && l.ty !== 1),
+      };
+    }),
+  };
+}
 
 /**
- * Apply theme primary colour to a Lottie animation JSON and strip the
- * navy background so it becomes transparent via mix-blend-mode:screen.
+ * Apply theme primary colour to a Lottie animation JSON and remove the
+ * solid background layer so it renders transparently over any backdrop.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function applyLottieTheme(animationData: any, theme: Theme): any {
   const target = THEME_PRIMARY[theme] ?? THEME_PRIMARY["detrimental-dark"];
 
-  // 1. Swap accent colour
-  let result = replaceColor(BASE_ACCENT, target, animationData);
+  // 1. Swap the accent colour
+  const recoloured = replaceColor(BASE_ACCENT, target, animationData);
 
-  // 2. Replace both navy background shades with black
-  //    (screen blend mode then makes them fully transparent)
-  for (const navy of NAVY_COLORS) {
-    result = replaceColor(navy, BLACK, result);
-  }
-
-  return result;
+  // 2. Strip the solid white background layer
+  return stripBackground(recoloured);
 }
