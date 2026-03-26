@@ -134,7 +134,8 @@ const SECTION_WORDS: Record<string, string> = {
   "/settings": "SETTINGS",
 };
 
-const MIN_DISPLAY_MS = 750;
+const SLOW_THRESHOLD_MS = 400; // only show if page takes longer than this
+const MIN_DISPLAY_MS = 1200; // once shown, keep visible at least this long
 
 export function NavigationLoader() {
   const pathname = usePathname();
@@ -143,6 +144,9 @@ export function NavigationLoader() {
   const [quote, setQuote] = useState(QUOTES[0]);
   const [word, setWord] = useState("SAIL");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const slowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navTimeRef = useRef<number>(0);
+  const cancelledRef = useRef(false);
 
   useEffect(() => {
     // Skip on very first render (initial page load)
@@ -153,18 +157,45 @@ export function NavigationLoader() {
     if (pathname === prevPathRef.current) return;
 
     prevPathRef.current = pathname;
+    cancelledRef.current = false;
 
-    // Pick random quote
+    // Pre-pick quote and word so they're ready if we show
     setQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
-
-    // Pick section word
     const sectionWord = SECTION_WORDS[pathname] ?? "SAIL";
     setWord(sectionWord);
 
-    setShow(true);
+    // Record navigation start time
+    navTimeRef.current = performance.now();
 
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setShow(false), MIN_DISPLAY_MS);
+    // Wait for the slow threshold — if page hasn't settled by then, show loader
+    if (slowTimerRef.current) clearTimeout(slowTimerRef.current);
+    slowTimerRef.current = setTimeout(() => {
+      if (cancelledRef.current) return;
+      setShow(true);
+
+      // Keep visible for minimum display time
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => setShow(false), MIN_DISPLAY_MS);
+    }, SLOW_THRESHOLD_MS);
+
+    // Check if page renders quickly — use rAF chain to detect paint completion
+    let frame1: number;
+    let frame2: number;
+    frame1 = requestAnimationFrame(() => {
+      frame2 = requestAnimationFrame(() => {
+        const elapsed = performance.now() - navTimeRef.current;
+        if (elapsed < SLOW_THRESHOLD_MS) {
+          // Page loaded fast — cancel the loader
+          cancelledRef.current = true;
+          if (slowTimerRef.current) clearTimeout(slowTimerRef.current);
+        }
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(frame1);
+      cancelAnimationFrame(frame2);
+    };
   }, [pathname]);
 
   return (
