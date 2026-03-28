@@ -237,7 +237,8 @@ export async function assembleDashboardData(date?: string, userId?: string | nul
     let deadlineSeverity: ChoreWithStatus["deadlineSeverity"];
 
     if (daysUntilDeadline < 0) {
-      deadlineLabel = "overdue!";
+      const absDays = Math.abs(daysUntilDeadline);
+      deadlineLabel = absDays === 1 ? "overdue 1 day ago" : `overdue ${absDays} days ago`;
       deadlineSeverity = "overdue";
     } else if (daysUntilDeadline === 0) {
       deadlineLabel = "today!";

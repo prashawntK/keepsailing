@@ -24,8 +24,8 @@ function getDaysFromToday(deadline: Date | string): number {
 }
 
 function deadlineLabel(days: number): string {
-  if (days < -1) return `${Math.abs(days)}d overdue`;
-  if (days === -1) return "1d overdue";
+  if (days < -1) return `overdue ${Math.abs(days)} days ago`;
+  if (days === -1) return "overdue 1 day ago";
   if (days === 0) return "today";
   if (days === 1) return "tomorrow";
   if (days <= 7) return `in ${days}d`;
